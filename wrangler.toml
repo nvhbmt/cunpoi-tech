@@ -1,0 +1,5 @@
+# Cho phép đẩy thẳng bản build lên Cloudflare Pages:
+#   npm run build && npx wrangler pages deploy dist
+name = "cunpoi-tech"
+compatibility_date = "2026-09-20"
+pages_build_output_dir = "dist"

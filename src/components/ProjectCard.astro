@@ -1,0 +1,362 @@
+---
+import type { Project } from '@/data/profile';
+
+interface Props {
+    project: Project;
+    /** Nhãn cho liên kết, lấy từ ngôn ngữ đang hiển thị. */
+    labels: { viewCode: string; viewLive: string; privateRepo: string };
+    index?: number;
+    compact?: boolean;
+    /** Thẻ chiếm trọn hàng: chữ to hơn, gạch đầu dòng chia hai cột. */
+    featured?: boolean;
+}
+
+const { project, labels, index = 0, compact = false, featured = false } = Astro.props;
+---
+
+<article
+    class:list={['card', { 'card--compact': compact, 'card--featured': featured }]}
+    data-tilt
+    data-reveal
+    style={`--reveal-delay:${index * 110}ms`}
+>
+    <div class="card__glow" aria-hidden="true"></div>
+
+    <header class="card__head">
+        <div class="card__title">
+            <h3>{project.name}</h3>
+            <p class="card__subtitle">{project.subtitle}</p>
+        </div>
+        {project.badge && (
+            <span class="card__badge" data-tone={project.tone ?? 'live'}>
+                {project.badge}
+            </span>
+        )}
+    </header>
+
+    <p class="card__meta mono">
+        <span>{project.period}</span>
+        <span class="card__meta-sep" aria-hidden="true">·</span>
+        <span>{project.role}</span>
+    </p>
+
+    <p class="card__summary">{project.summary}</p>
+
+    <ul class="card__bullets">
+        {project.bullets.map((bullet) => <li>{bullet}</li>)}
+    </ul>
+
+    {
+        project.metrics.length > 0 && (
+            <dl class="card__metrics">
+                {project.metrics.map((metric) => (
+                    <div>
+                        <dt>{metric.value}</dt>
+                        <dd>{metric.label}</dd>
+                    </div>
+                ))}
+            </dl>
+        )
+    }
+
+    <ul class="chips card__stack">
+        {project.stack.map((tech) => <li class="chip">{tech}</li>)}
+    </ul>
+
+    {
+        (project.links.length > 0 || project.privateRepo) && (
+            <footer class="card__links">
+                {project.links.map((link) => (
+                    <a
+                        class="link"
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${link.kind === 'live' ? labels.viewLive : labels.viewCode}: ${project.name}`}
+                    >
+                        {link.kind === 'live' ? (
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                <path d="M7 17 17 7M9 7h8v8" />
+                            </svg>
+                        ) : (
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+                                <path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" />
+                            </svg>
+                        )}
+                        {link.label}
+                    </a>
+                ))}
+
+                {project.privateRepo && (
+                    <span class="card__private mono">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                            <rect x="4.5" y="10.5" width="15" height="10" rx="2" />
+                            <path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7" />
+                        </svg>
+                        {labels.privateRepo}
+                    </span>
+                )}
+            </footer>
+        )
+    }
+</article>
+
+<style>
+    .card {
+        --mx: 50%;
+        --my: 0%;
+        --tilt-x: 0deg;
+        --tilt-y: 0deg;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.95rem;
+        padding: clamp(1.35rem, 2.6vw, 2rem);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: linear-gradient(165deg, rgba(146, 172, 220, 0.05), rgba(10, 14, 23, 0.6) 55%);
+        overflow: hidden;
+        isolation: isolate;
+        transform: perspective(1100px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+        transition:
+            border-color 0.45s var(--ease),
+            transform 0.5s var(--ease),
+            box-shadow 0.45s var(--ease);
+    }
+
+    .card:hover {
+        border-color: rgba(110, 168, 255, 0.36);
+        box-shadow: 0 26px 60px -34px rgba(110, 168, 255, 0.6);
+    }
+
+    /* Quầng sáng bám theo con trỏ, toạ độ do script đặt vào --mx/--my. */
+    .card__glow {
+        position: absolute;
+        inset: -1px;
+        z-index: -1;
+        opacity: 0;
+        background: radial-gradient(
+            22rem 22rem at var(--mx) var(--my),
+            rgba(110, 168, 255, 0.16),
+            transparent 62%
+        );
+        transition: opacity 0.5s var(--ease);
+    }
+
+    .card:hover .card__glow {
+        opacity: 1;
+    }
+
+    /* --- đầu thẻ --- */
+
+    .card__head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .card__title h3 {
+        font-size: clamp(1.2rem, 1rem + 0.7vw, 1.55rem);
+        letter-spacing: -0.03em;
+    }
+
+    .card__subtitle {
+        color: var(--text-mut);
+        font-size: 0.9rem;
+        line-height: 1.45;
+        margin-top: 0.3rem;
+    }
+
+    .card__badge {
+        --tone-fg: var(--mint);
+        --tone-bd: rgba(94, 234, 212, 0.35);
+        --tone-bg: rgba(94, 234, 212, 0.08);
+        flex-shrink: 0;
+        font-family: var(--font-mono);
+        font-size: 0.64rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--tone-fg);
+        border: 1px solid var(--tone-bd);
+        background: var(--tone-bg);
+        border-radius: 999px;
+        padding: 0.26rem 0.6rem;
+        white-space: nowrap;
+    }
+
+    /* Đang làm dở: xanh dương. Nội bộ doanh nghiệp: xám, không mời gọi bấm vào. */
+    .card__badge[data-tone='wip'] {
+        --tone-fg: var(--accent-soft);
+        --tone-bd: rgba(110, 168, 255, 0.35);
+        --tone-bg: rgba(110, 168, 255, 0.09);
+    }
+
+    .card__badge[data-tone='closed'] {
+        --tone-fg: var(--text-mut);
+        --tone-bd: var(--line);
+        --tone-bg: rgba(146, 172, 220, 0.05);
+    }
+
+    .card__meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        font-size: 0.72rem;
+        color: var(--text-mut);
+    }
+
+    .card__meta-sep {
+        opacity: 0.5;
+    }
+
+    .card__summary {
+        color: var(--text-dim);
+        font-size: 0.95rem;
+        line-height: 1.62;
+    }
+
+    /* --- gạch đầu dòng --- */
+
+    .card__bullets {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        line-height: 1.55;
+        color: var(--text-mut);
+    }
+
+    .card__bullets li {
+        position: relative;
+        padding-left: 1.1rem;
+    }
+
+    .card__bullets li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.6em;
+        width: 5px;
+        height: 5px;
+        rotate: 45deg;
+        border: 1px solid var(--accent);
+        opacity: 0.75;
+    }
+
+    .card__bullets :global(code) {
+        color: var(--accent-soft);
+        background: rgba(110, 168, 255, 0.1);
+        padding: 0.05em 0.35em;
+        border-radius: 4px;
+    }
+
+    /* --- số liệu --- */
+
+    .card__metrics {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem 1.6rem;
+        margin: 0;
+        padding: 0.9rem 0;
+        border-block: 1px solid var(--line);
+    }
+
+    .card__metrics div {
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+    }
+
+    .card__metrics dt {
+        font-family: var(--font-display);
+        font-size: 1.22rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        color: var(--text);
+        line-height: 1.1;
+    }
+
+    .card__metrics dd {
+        margin: 0;
+        font-size: 0.7rem;
+        color: var(--text-mut);
+        letter-spacing: 0.01em;
+    }
+
+    .card__stack {
+        margin-top: 0.15rem;
+    }
+
+    /* --- chân thẻ --- */
+
+    .card__links {
+        margin-top: auto;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.6rem 1.25rem;
+        padding-top: 0.25rem;
+    }
+
+    .card__private {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.72rem;
+        color: var(--text-mut);
+    }
+
+    /* --- biến thể nổi bật --- */
+
+    .card--featured {
+        padding: clamp(1.6rem, 3.2vw, 2.6rem);
+    }
+
+    .card--featured .card__title h3 {
+        font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.2rem);
+    }
+
+    .card--featured .card__subtitle,
+    .card--featured .card__summary {
+        font-size: 1rem;
+    }
+
+    @media (min-width: 900px) {
+        .card--featured .card__bullets {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            column-gap: clamp(1.5rem, 3vw, 3rem);
+        }
+
+        .card--featured .card__summary {
+            max-width: 62ch;
+        }
+    }
+
+    .card--compact {
+        border-radius: 14px;
+    }
+
+    /* Màn hẹp: dòng meta xuống hàng, bỏ dấu chấm giữa kẻo nó rơi trơ một mình. */
+    @media (max-width: 560px) {
+        .card__meta {
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .card__meta-sep {
+            display: none;
+        }
+    }
+
+    .card--compact .card__bullets {
+        font-size: 0.84rem;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .card {
+            transform: none;
+        }
+    }
+</style>

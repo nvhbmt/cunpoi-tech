@@ -1,0 +1,202 @@
+---
+import { content as allContent, type Lang } from '@/data/profile';
+import SectionHead from '@/components/SectionHead.astro';
+
+interface Props {
+    lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = allContent[lang];
+---
+
+<section class="section" id="about">
+    <div class="shell">
+        <SectionHead n={t.about.n} title={t.about.title} lead={t.about.lead} />
+
+        <div class="about">
+            <div class="about__text prose" data-reveal>
+                {t.about.paragraphs.map((p) => <p>{p}</p>)}
+
+                <dl class="about__edu">
+                    <dt>{t.education.title}</dt>
+                    <dd>
+                        <strong>{t.education.school}</strong>
+                        <span>{t.education.degree}</span>
+                        <span class="mono about__period">{t.education.period}</span>
+                        <ul>
+                            {t.education.details.map((d) => <li>{d}</li>)}
+                        </ul>
+                    </dd>
+                </dl>
+            </div>
+
+            <div class="about__pillars">
+                {
+                    t.about.pillars.map((pillar, i) => (
+                        <article class="pillar" data-reveal style={`--reveal-delay:${120 + i * 110}ms`}>
+                            <h3>{pillar.title}</h3>
+                            <p>{pillar.body}</p>
+                            <ul class="pillar__items">
+                                {pillar.items.map((item) => (
+                                    <li>{item}</li>
+                                ))}
+                            </ul>
+                        </article>
+                    ))
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .about {
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+        gap: clamp(2rem, 5vw, 4.5rem);
+        align-items: start;
+    }
+
+    .about__text {
+        font-size: 1.02rem;
+    }
+
+    /* --- học vấn --- */
+
+    .about__edu {
+        margin-top: 2.5rem;
+        padding-top: 1.6rem;
+        border-top: 1px solid var(--line);
+    }
+
+    .about__edu dt {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--text-mut);
+        margin-bottom: 0.7rem;
+    }
+
+    .about__edu dd {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+
+    .about__edu strong {
+        font-family: var(--font-display);
+        font-weight: 600;
+        color: var(--text);
+        font-size: 1.02rem;
+        letter-spacing: -0.02em;
+    }
+
+    .about__period {
+        color: var(--text-mut);
+        font-size: 0.75rem;
+        margin-top: 0.15rem;
+    }
+
+    .about__edu ul {
+        margin-top: 0.7rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        font-size: 0.875rem;
+        color: var(--text-mut);
+    }
+
+    .about__edu ul li {
+        padding-left: 1rem;
+        position: relative;
+    }
+
+    .about__edu ul li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.62em;
+        width: 4px;
+        height: 4px;
+        rotate: 45deg;
+        background: var(--accent);
+        opacity: 0.6;
+    }
+
+    /* --- ba trụ --- */
+
+    .about__pillars {
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+    }
+
+    .pillar {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 1.4rem 1.5rem;
+        background: linear-gradient(160deg, rgba(146, 172, 220, 0.055), transparent 65%);
+        transition: border-color 0.4s var(--ease), transform 0.4s var(--ease),
+            background-color 0.4s var(--ease);
+    }
+
+    .pillar:hover {
+        border-color: var(--line-strong);
+        transform: translateX(4px);
+    }
+
+    .pillar h3 {
+        font-size: 1.04rem;
+        margin-bottom: 0.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .pillar h3::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        rotate: 45deg;
+        border: 1px solid var(--accent);
+        flex-shrink: 0;
+    }
+
+    .pillar p {
+        color: var(--text-mut);
+        font-size: 0.88rem;
+        line-height: 1.55;
+        margin-bottom: 0.9rem;
+    }
+
+    .pillar__items {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem 0.85rem;
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        color: var(--text-dim);
+    }
+
+    .pillar__items li {
+        position: relative;
+        padding-left: 0.7rem;
+    }
+
+    .pillar__items li::before {
+        content: '/';
+        position: absolute;
+        left: 0;
+        color: var(--accent);
+        opacity: 0.55;
+    }
+
+    @media (max-width: 900px) {
+        .about {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

@@ -1,0 +1,261 @@
+---
+import { content as allContent, site, type Lang } from '@/data/profile';
+
+interface Props {
+    lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = allContent[lang];
+const home = lang === 'vi' ? '/' : '/en';
+
+const items = [
+    { id: 'about', label: t.nav.about },
+    { id: 'work', label: t.nav.work },
+    { id: 'projects', label: t.nav.projects },
+    { id: 'skills', label: t.nav.skills },
+    { id: 'contact', label: t.nav.contact },
+];
+---
+
+<header class="site-nav" data-nav>
+    <div class="site-nav__inner">
+        <a class="brand" href={home} aria-label={site.domain}>
+            <span class="brand__mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.4">
+                    <path d="M12 2.2 21 7.4v9.2L12 21.8 3 16.6V7.4z" />
+                    <path d="M12 2.2v19.6M3 7.4l18 9.2M21 7.4 3 16.6" opacity=".45" />
+                </svg>
+            </span>
+            <span class="brand__text">cunpoi<span class="brand__tld">.tech</span></span>
+        </a>
+
+        <nav class="site-nav__links" aria-label={t.nav.projects}>
+            {
+                items.map((item) => (
+                    <a href={`#${item.id}`} data-section={item.id}>
+                        {item.label}
+                    </a>
+                ))
+            }
+        </nav>
+
+        <div class="site-nav__actions">
+            <a class="lang-switch" href={t.switchTo.href} aria-label={t.switchTo.aria} hreflang={t.switchTo.label.toLowerCase()}>
+                <span class="lang-switch__on">{lang.toUpperCase()}</span>
+                <span class="lang-switch__off">{t.switchTo.label}</span>
+            </a>
+            <a class="nav-cv" href={site.cv} download>
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M12 3v12m0 0 4.2-4.2M12 15l-4.2-4.2M4 17v2.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V17" />
+                </svg>
+                CV
+            </a>
+        </div>
+    </div>
+</header>
+
+<style>
+    .site-nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 50;
+        transition: background-color 0.4s var(--ease), border-color 0.4s var(--ease),
+            backdrop-filter 0.4s var(--ease);
+        border-bottom: 1px solid transparent;
+    }
+
+    .site-nav.is-stuck {
+        background: color-mix(in srgb, var(--ink-900) 78%, transparent);
+        backdrop-filter: blur(14px) saturate(140%);
+        -webkit-backdrop-filter: blur(14px) saturate(140%);
+        border-bottom-color: var(--line);
+    }
+
+    .site-nav__inner {
+        max-width: var(--maxw);
+        margin-inline: auto;
+        padding: 0.85rem var(--pad);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    /* --- thương hiệu --- */
+
+    .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 0.98rem;
+        letter-spacing: -0.02em;
+        flex-shrink: 0;
+    }
+
+    .brand__mark {
+        color: var(--accent);
+        display: grid;
+        place-items: center;
+        transition: transform 0.6s var(--ease), color 0.35s var(--ease);
+    }
+
+    .brand:hover .brand__mark {
+        transform: rotate(120deg);
+        color: var(--cyan);
+    }
+
+    .brand__tld {
+        color: var(--text-mut);
+        font-weight: 500;
+    }
+
+    /* --- liên kết mục --- */
+
+    .site-nav__links {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-inline: auto;
+    }
+
+    .site-nav__links a {
+        position: relative;
+        font-size: 0.86rem;
+        color: var(--text-mut);
+        padding: 0.4rem 0.7rem;
+        border-radius: 999px;
+        transition: color 0.3s var(--ease), background-color 0.3s var(--ease);
+        white-space: nowrap;
+    }
+
+    .site-nav__links a::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        bottom: 0.1rem;
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: var(--accent);
+        opacity: 0;
+        transform: translateX(-50%) scale(0.4);
+        transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+    }
+
+    .site-nav__links a:hover {
+        color: var(--text);
+        background: rgba(146, 172, 220, 0.07);
+    }
+
+    .site-nav__links a.is-active {
+        color: var(--text);
+    }
+
+    .site-nav__links a.is-active::after {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+
+    /* --- hành động bên phải --- */
+
+    .site-nav__actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .lang-switch {
+        display: inline-flex;
+        align-items: center;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        letter-spacing: 0.06em;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        overflow: hidden;
+        transition: border-color 0.3s var(--ease);
+    }
+
+    .lang-switch:hover {
+        border-color: var(--line-strong);
+    }
+
+    .lang-switch__on,
+    .lang-switch__off {
+        padding: 0.32rem 0.55rem;
+        transition: background-color 0.3s var(--ease), color 0.3s var(--ease);
+    }
+
+    .lang-switch__on {
+        background: rgba(110, 168, 255, 0.16);
+        color: var(--accent-soft);
+    }
+
+    .lang-switch__off {
+        color: var(--text-mut);
+    }
+
+    .lang-switch:hover .lang-switch__off {
+        color: var(--text);
+    }
+
+    .nav-cv {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
+        color: var(--text-dim);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0.32rem 0.7rem;
+        transition: color 0.3s var(--ease), border-color 0.3s var(--ease),
+            background-color 0.3s var(--ease);
+    }
+
+    .nav-cv:hover {
+        color: #fff;
+        border-color: rgba(110, 168, 255, 0.5);
+        background: rgba(110, 168, 255, 0.1);
+    }
+
+    /* --- màn hình hẹp: mục cuộn ngang dưới thanh --- */
+
+    @media (max-width: 900px) {
+        .site-nav__inner {
+            flex-wrap: wrap;
+            row-gap: 0.4rem;
+            padding-block: 0.7rem 0.55rem;
+        }
+
+        .site-nav__links {
+            order: 3;
+            width: 100%;
+            margin-inline: 0;
+            overflow-x: auto;
+            scrollbar-width: none;
+            gap: 0.15rem;
+            padding-bottom: 0.15rem;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .site-nav__links::-webkit-scrollbar {
+            display: none;
+        }
+
+        .site-nav__actions {
+            margin-left: auto;
+        }
+
+        .site-nav__links a {
+            font-size: 0.8rem;
+            padding-inline: 0.55rem;
+        }
+    }
+</style>

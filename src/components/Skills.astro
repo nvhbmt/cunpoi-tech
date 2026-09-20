@@ -1,0 +1,120 @@
+---
+import { content as allContent, type Lang } from '@/data/profile';
+import SectionHead from '@/components/SectionHead.astro';
+
+interface Props {
+    lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = allContent[lang];
+---
+
+<section class="section" id="skills">
+    <div class="shell">
+        <SectionHead n={t.skills.n} title={t.skills.title} lead={t.skills.lead} />
+
+        <div class="skills">
+            {
+                t.skills.groups.map((group, i) => (
+                    <section class="skillset" data-reveal style={`--reveal-delay:${i * 80}ms`}>
+                        <h3 class="skillset__title">
+                            <span class="skillset__n mono">{String(i + 1).padStart(2, '0')}</span>
+                            {group.title}
+                        </h3>
+                        <ul class="skillset__items">
+                            {group.items.map((item) => (
+                                <li>{item}</li>
+                            ))}
+                        </ul>
+                    </section>
+                ))
+            }
+        </div>
+    </div>
+</section>
+
+<style>
+    .skills {
+        display: grid;
+        /* Cố định 3 cột: 6 nhóm chia hết, không để lại ô trống lộ nền kẻ. */
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1px;
+        background: var(--line);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .skillset {
+        background: var(--ink-850);
+        padding: clamp(1.25rem, 2.4vw, 1.75rem);
+        transition: background-color 0.45s var(--ease);
+    }
+
+    .skillset:hover {
+        background: var(--ink-700);
+    }
+
+    .skillset__title {
+        display: flex;
+        align-items: baseline;
+        gap: 0.6rem;
+        font-size: 1rem;
+        letter-spacing: -0.02em;
+        margin-bottom: 1rem;
+    }
+
+    .skillset__n {
+        font-size: 0.68rem;
+        color: var(--accent);
+        opacity: 0.8;
+    }
+
+    .skillset__items {
+        display: flex;
+        flex-direction: column;
+        gap: 0.42rem;
+        font-size: 0.85rem;
+        color: var(--text-mut);
+    }
+
+    .skillset__items li {
+        position: relative;
+        padding-left: 0.95rem;
+        transition: color 0.3s var(--ease);
+    }
+
+    @media (max-width: 940px) {
+        .skills {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 580px) {
+        .skills {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .skillset__items li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.6em;
+        width: 4px;
+        height: 4px;
+        rotate: 45deg;
+        background: var(--accent);
+        opacity: 0.45;
+        transition: opacity 0.3s var(--ease), background-color 0.3s var(--ease);
+    }
+
+    .skillset:hover .skillset__items li {
+        color: var(--text-dim);
+    }
+
+    .skillset:hover .skillset__items li::before {
+        opacity: 0.85;
+    }
+</style>

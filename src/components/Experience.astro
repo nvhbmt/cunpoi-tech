@@ -1,0 +1,161 @@
+---
+import { content as allContent, type Lang } from '@/data/profile';
+import SectionHead from '@/components/SectionHead.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+
+interface Props {
+    lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = allContent[lang];
+const labels = {
+    viewCode: t.projects.viewCode,
+    viewLive: t.projects.viewLive,
+    privateRepo: t.projects.privateRepo,
+};
+---
+
+<section class="section" id="work">
+    <div class="shell">
+        <SectionHead n={t.work.n} title={t.work.title} lead={t.work.lead} />
+
+        <article class="job" data-reveal>
+            <div class="job__rail" aria-hidden="true"></div>
+
+            <header class="job__head">
+                <div>
+                    <h3 class="job__company">{t.work.company}</h3>
+                    <p class="job__position">{t.work.position}</p>
+                </div>
+                <p class="job__when mono">
+                    <span>{t.work.period}</span>
+                    <span class="job__dot" aria-hidden="true">·</span>
+                    <span>{t.work.location}</span>
+                </p>
+            </header>
+
+            <p class="job__intro">{t.work.intro}</p>
+
+            <ul class="job__bullets">
+                {t.work.bullets.map((bullet) => <li>{bullet}</li>)}
+            </ul>
+        </article>
+
+        <h3 class="products__title eyebrow" data-reveal>{t.work.productsTitle}</h3>
+
+        <div class="products">
+            {
+                t.work.products.map((project, i) => (
+                    <ProjectCard project={project} labels={labels} index={i} compact />
+                ))
+            }
+        </div>
+    </div>
+</section>
+
+<style>
+    .job {
+        position: relative;
+        padding-left: clamp(1.25rem, 3vw, 2.25rem);
+        margin-bottom: clamp(3rem, 6vw, 4.5rem);
+    }
+
+    /* Thanh dọc bên trái, sáng dần từ trên xuống. */
+    .job__rail {
+        position: absolute;
+        left: 0;
+        top: 0.55rem;
+        bottom: 0.4rem;
+        width: 2px;
+        border-radius: 2px;
+        background: linear-gradient(
+            to bottom,
+            var(--accent),
+            rgba(110, 168, 255, 0.35) 35%,
+            transparent
+        );
+    }
+
+    .job__head {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 0.4rem 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .job__company {
+        font-size: clamp(1.3rem, 1.05rem + 1vw, 1.85rem);
+        letter-spacing: -0.03em;
+    }
+
+    .job__position {
+        color: var(--accent-soft);
+        font-size: 0.95rem;
+        margin-top: 0.2rem;
+    }
+
+    .job__when {
+        display: inline-flex;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+        color: var(--text-mut);
+    }
+
+    .job__dot {
+        opacity: 0.5;
+    }
+
+    .job__intro {
+        color: var(--text-dim);
+        max-width: 60ch;
+        margin-bottom: 1.5rem;
+    }
+
+    .job__bullets {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 25rem), 1fr));
+        gap: 0.85rem 2.5rem;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        color: var(--text-mut);
+    }
+
+    .job__bullets li {
+        position: relative;
+        padding-left: 1.2rem;
+    }
+
+    .job__bullets li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.62em;
+        width: 6px;
+        height: 1px;
+        background: var(--accent);
+        opacity: 0.8;
+    }
+
+    .products__title {
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .products__title::after {
+        content: '';
+        height: 1px;
+        flex: 1;
+        background: var(--line);
+    }
+
+    .products {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
+        gap: var(--gap);
+    }
+</style>

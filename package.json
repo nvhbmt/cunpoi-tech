@@ -1,0 +1,27 @@
+{
+  "name": "cunpoi-tech",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Trang cá nhân của Nguyễn Việt Hoàng — cunpoi.tech",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "build:fast": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "og": "node scripts/make-og.mjs",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^7.3.3",
+    "three": "^0.186.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/sitemap": "^3.7.4",
+    "@types/three": "^0.186.0",
+    "typescript": "^5.9.2"
+  }
+}

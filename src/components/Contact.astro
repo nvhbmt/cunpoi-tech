@@ -1,0 +1,152 @@
+---
+import { content as allContent, site, type Lang } from '@/data/profile';
+
+interface Props {
+    lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = allContent[lang];
+---
+
+<section class="section contact" id="contact">
+    <div class="shell">
+        <div class="contact__box" data-reveal>
+            <div class="contact__grain" aria-hidden="true"></div>
+
+            <p class="eyebrow contact__n">
+                <span>{t.contact.n}</span>
+                <span class="contact__rule" aria-hidden="true"></span>
+            </p>
+
+            <h2 class="contact__title">{t.contact.title}</h2>
+            <p class="contact__lead">{t.contact.lead}</p>
+            <p class="contact__body">{t.contact.body}</p>
+
+            <a class="contact__mail" href={`mailto:${site.email}`}>
+                <span>{site.email}</span>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M5 12h13m0 0-5-5m5 5-5 5" />
+                </svg>
+            </a>
+
+            <div class="contact__links">
+                <a class="btn btn--ghost" href={`mailto:${site.email}`}>{t.contact.emailLabel}</a>
+                <a class="btn btn--ghost" href={site.github} target="_blank" rel="noopener noreferrer">
+                    {t.contact.githubLabel}
+                </a>
+                <a class="btn btn--ghost" href={site.live} target="_blank" rel="noopener noreferrer">
+                    {t.contact.liveLabel}
+                </a>
+                <a class="btn btn--ghost" href={site.cv} download>{t.contact.cvLabel}</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .contact__box {
+        position: relative;
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        padding: clamp(2rem, 5vw, 4rem);
+        overflow: hidden;
+        background:
+            radial-gradient(90% 120% at 12% 0%, rgba(110, 168, 255, 0.14), transparent 62%),
+            radial-gradient(70% 90% at 92% 100%, rgba(167, 139, 250, 0.12), transparent 62%),
+            var(--ink-850);
+    }
+
+    /* Lưới kẻ rất mờ, cùng ngôn ngữ hình với hero. */
+    .contact__grain {
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(to right, rgba(146, 172, 220, 0.05) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(146, 172, 220, 0.05) 1px, transparent 1px);
+        background-size: 46px 46px;
+        mask-image: radial-gradient(80% 80% at 50% 50%, #000, transparent 75%);
+        -webkit-mask-image: radial-gradient(80% 80% at 50% 50%, #000, transparent 75%);
+        pointer-events: none;
+    }
+
+    .contact__box > :not(.contact__grain) {
+        position: relative;
+    }
+
+    .contact__n {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        color: var(--accent);
+        margin-bottom: 1rem;
+    }
+
+    .contact__rule {
+        height: 1px;
+        flex: 1;
+        max-width: 7rem;
+        background: linear-gradient(to right, rgba(110, 168, 255, 0.55), transparent);
+    }
+
+    .contact__title {
+        font-size: clamp(1.9rem, 1.3rem + 2.4vw, 3.1rem);
+        margin-bottom: 0.75rem;
+    }
+
+    .contact__lead {
+        font-family: var(--font-display);
+        font-size: clamp(1.1rem, 1rem + 0.6vw, 1.45rem);
+        color: var(--accent-soft);
+        letter-spacing: -0.02em;
+        margin-bottom: 0.65rem;
+    }
+
+    .contact__body {
+        color: var(--text-dim);
+        max-width: 56ch;
+        margin-bottom: 2rem;
+    }
+
+    /* Địa chỉ email in lớn — thứ duy nhất cần nhớ trên trang này. */
+    .contact__mail {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.8rem;
+        font-family: var(--font-display);
+        font-size: clamp(1.15rem, 0.95rem + 1.5vw, 2.1rem);
+        font-weight: 600;
+        letter-spacing: -0.035em;
+        color: var(--text);
+        word-break: break-word;
+        padding-bottom: 0.35rem;
+        background-image: linear-gradient(to right, var(--accent), var(--violet));
+        background-repeat: no-repeat;
+        background-size: 0% 2px;
+        background-position: 0 100%;
+        transition: background-size 0.55s var(--ease), color 0.35s var(--ease);
+    }
+
+    .contact__mail:hover {
+        background-size: 100% 2px;
+        color: #fff;
+    }
+
+    .contact__mail svg {
+        flex-shrink: 0;
+        transition: transform 0.45s var(--ease);
+    }
+
+    .contact__mail:hover svg {
+        transform: translateX(5px);
+    }
+
+    .contact__links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        margin-top: 2.25rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--line);
+    }
+</style>

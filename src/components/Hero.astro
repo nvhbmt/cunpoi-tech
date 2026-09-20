@@ -1,0 +1,312 @@
+---
+import { content as allContent, site, type Lang } from '@/data/profile';
+
+interface Props {
+    lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = allContent[lang];
+---
+
+<section class="hero" id="top">
+    <canvas class="hero__canvas" data-hero-canvas aria-hidden="true"></canvas>
+    <div class="hero__veil" aria-hidden="true"></div>
+
+    <div class="shell hero__inner">
+        <p class="hero__status">
+            <span class="hero__dot" aria-hidden="true"></span>
+            {t.hero.available}
+        </p>
+
+        <p class="eyebrow hero__eyebrow">{t.hero.eyebrow}</p>
+
+        <h1 class="hero__name">{t.hero.name}</h1>
+
+        <ul class="hero__roles" aria-label={t.hero.eyebrow}>
+            {t.hero.roles.map((role) => <li>{role}</li>)}
+        </ul>
+
+        <p class="hero__tagline">{t.hero.tagline}</p>
+
+        <div class="hero__cta">
+            <a class="btn btn--primary" href="#projects">
+                {t.hero.ctaProjects}
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M5 12h13m0 0-5-5m5 5-5 5" />
+                </svg>
+            </a>
+            <a class="btn btn--ghost" href={site.cv} download>
+                {t.hero.ctaCv}
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M12 3v12m0 0 4.2-4.2M12 15l-4.2-4.2M4 17v2.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V17" />
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <a class="hero__scroll" href="#about" aria-label={t.hero.scroll}>
+        <span>{t.hero.scroll}</span>
+        <span class="hero__scroll-rail" aria-hidden="true"><i></i></span>
+    </a>
+</section>
+
+<script>
+    const canvas = document.querySelector<HTMLCanvasElement>('[data-hero-canvas]');
+    if (canvas) {
+        // three.js nặng hơn cả phần còn lại của trang cộng lại, nên chỉ nạp sau khi
+        // trình duyệt đã rảnh — nội dung chữ không phải chờ nó.
+        const boot = () => {
+            import('@/scripts/hero3d')
+                .then(({ initHero }) => initHero(canvas))
+                .catch(() => canvas.remove());
+        };
+
+        const idle = (window as Window & {
+            requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+        }).requestIdleCallback;
+
+        if (idle) idle(boot, { timeout: 1500 });
+        else setTimeout(boot, 200);
+    }
+</script>
+
+<style>
+    .hero {
+        position: relative;
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding-block: 7rem 5rem;
+        overflow: hidden;
+        isolation: isolate;
+    }
+
+    /* Lưới kẻ CSS nằm dưới canvas: nếu WebGL không chạy, hero vẫn có cấu trúc. */
+    .hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -3;
+        background-image:
+            linear-gradient(to right, rgba(110, 168, 255, 0.055) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(110, 168, 255, 0.055) 1px, transparent 1px);
+        background-size: 64px 64px;
+        mask-image: radial-gradient(70% 60% at 50% 45%, #000 20%, transparent 78%);
+        -webkit-mask-image: radial-gradient(70% 60% at 50% 45%, #000 20%, transparent 78%);
+    }
+
+    .hero__canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -2;
+        opacity: 0;
+        transition: opacity 1.4s var(--ease);
+    }
+
+    .hero__canvas[data-ready='true'] {
+        opacity: 1;
+    }
+
+    /* Làm tối phía trái để chữ luôn đủ tương phản trên hình 3D. */
+    .hero__veil {
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background:
+            linear-gradient(100deg, var(--ink-900) 8%, rgba(5, 7, 12, 0.72) 42%, transparent 68%),
+            linear-gradient(to top, var(--ink-900) 2%, transparent 26%);
+        pointer-events: none;
+    }
+
+    .hero__inner {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.15rem;
+        max-width: min(100%, 58rem);
+    }
+
+    /* --- viên trạng thái --- */
+
+    .hero__status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        font-size: 0.8rem;
+        color: var(--text-dim);
+        border: 1px solid var(--line);
+        background: rgba(146, 172, 220, 0.05);
+        border-radius: 999px;
+        padding: 0.35rem 0.85rem 0.35rem 0.7rem;
+        backdrop-filter: blur(6px);
+        animation: rise 0.9s var(--ease) both;
+    }
+
+    .hero__dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--mint);
+        box-shadow: 0 0 0 0 rgba(94, 234, 212, 0.6);
+        animation: ping 2.6s ease-out infinite;
+    }
+
+    @keyframes ping {
+        0% { box-shadow: 0 0 0 0 rgba(94, 234, 212, 0.55); }
+        70% { box-shadow: 0 0 0 9px rgba(94, 234, 212, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(94, 234, 212, 0); }
+    }
+
+    .hero__eyebrow {
+        animation: rise 0.9s var(--ease) 0.08s both;
+    }
+
+    /* --- tên --- */
+
+    .hero__name {
+        font-size: clamp(2.6rem, 1.4rem + 6.2vw, 6rem);
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        /* Nền chỉ tô trong hộp chữ, nên dấu vượt ra ngoài sẽ mất màu — nới thêm chỗ. */
+        line-height: 1.1;
+        padding-block: 0.08em 0.04em;
+        background: linear-gradient(135deg, #ffffff 12%, #cddcf7 44%, var(--accent) 88%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: rise 1s var(--ease) 0.14s both;
+    }
+
+    /* --- ba vai trò --- */
+
+    .hero__roles {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem 0.9rem;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        letter-spacing: 0.02em;
+        color: var(--text-dim);
+        animation: rise 1s var(--ease) 0.22s both;
+    }
+
+    .hero__roles li {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.9rem;
+    }
+
+    .hero__roles li + li::before {
+        content: '';
+        width: 4px;
+        height: 4px;
+        rotate: 45deg;
+        background: var(--accent);
+        opacity: 0.7;
+    }
+
+    .hero__tagline {
+        color: var(--text-dim);
+        font-size: clamp(1rem, 0.94rem + 0.42vw, 1.28rem);
+        line-height: 1.62;
+        max-width: 46ch;
+        margin-top: 0.15rem;
+        animation: rise 1s var(--ease) 0.3s both;
+    }
+
+    .hero__cta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.7rem;
+        margin-top: 0.85rem;
+        animation: rise 1s var(--ease) 0.38s both;
+    }
+
+    /* --- gợi ý cuộn --- */
+
+    .hero__scroll {
+        position: absolute;
+        bottom: 1.8rem;
+        left: 50%;
+        translate: -50% 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.55rem;
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        color: var(--text-mut);
+        animation: rise 1s var(--ease) 0.7s both;
+        transition: color 0.3s var(--ease);
+    }
+
+    .hero__scroll:hover {
+        color: var(--text);
+    }
+
+    .hero__scroll-rail {
+        width: 1px;
+        height: 42px;
+        background: var(--line-strong);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero__scroll-rail i {
+        position: absolute;
+        inset-inline: 0;
+        height: 14px;
+        background: linear-gradient(to bottom, transparent, var(--accent));
+        animation: drop 2.2s var(--ease) infinite;
+    }
+
+    @keyframes drop {
+        0% { transform: translateY(-16px); opacity: 0; }
+        35% { opacity: 1; }
+        100% { transform: translateY(42px); opacity: 0; }
+    }
+
+    @keyframes rise {
+        from { opacity: 0; transform: translateY(16px); }
+        to { opacity: 1; transform: none; }
+    }
+
+    @media (max-width: 720px) {
+        .hero {
+            padding-block: 8.5rem 6rem;
+        }
+
+        .hero__veil {
+            background:
+                linear-gradient(to bottom, rgba(5, 7, 12, 0.82) 0%, rgba(5, 7, 12, 0.35) 45%, var(--ink-900) 92%);
+        }
+
+        .hero__scroll {
+            display: none;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .hero__status,
+        .hero__eyebrow,
+        .hero__name,
+        .hero__roles,
+        .hero__tagline,
+        .hero__cta,
+        .hero__scroll {
+            animation: none;
+        }
+
+        .hero__scroll-rail i,
+        .hero__dot {
+            animation: none;
+        }
+    }
+</style>

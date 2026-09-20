@@ -1,0 +1,13 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist"],
+  "compilerOptions": {
+    "strictNullChecks": true,
+    // Không dùng `baseUrl` (TypeScript 7 bỏ hẳn) — từ TS 4.4 các đường dẫn trong
+    // `paths` đã tự hiểu là tương đối so với chính file tsconfig này.
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
