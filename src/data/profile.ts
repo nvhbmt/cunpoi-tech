@@ -382,7 +382,6 @@ const vi: Content = {
         degree: 'Kỹ sư Kỹ thuật phần mềm — sinh viên năm 4',
         period: '2023 — nay',
         details: [
-            'GPA 3.19 / 4.0',
             'Môn liên quan: Cấu trúc dữ liệu & Giải thuật, Lập trình Web, Cơ sở dữ liệu, Hệ điều hành, Mạng máy tính, Công nghệ phần mềm.',
         ],
     },
@@ -661,7 +660,6 @@ const en: Content = {
         degree: 'B.Eng. Software Engineering — fourth year',
         period: '2023 — Present',
         details: [
-            'GPA 3.19 / 4.0',
             'Relevant coursework: Data Structures & Algorithms, Web Programming, Database Systems, Operating Systems, Computer Networks, Software Engineering.',
         ],
     },
