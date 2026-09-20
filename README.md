@@ -56,33 +56,39 @@ chuyện một ngôn ngữ bị bỏ sót.
 - **Không có `manualChunks` dạng object** trong `astro.config.mjs`: Astro 7 dùng Rolldown, chỉ
   nhận hàm. Việc tách gói đã do `import()` động lo.
 
-## Deploy — Cloudflare Pages
+## Deploy — Cloudflare Workers (static assets)
 
 Bản build là thư mục tĩnh, không cần máy chủ Node.
 
-**Cách 1 — nối Git (khuyến nghị).** Trong Cloudflare Dashboard → Workers & Pages → Create →
-Pages → Connect to Git, chọn repo này rồi điền:
+> **Đã vấp một lần:** ban đầu `wrangler.toml` khai `pages_build_output_dir = "dist"`, nhưng khoá
+> đó **chỉ** `wrangler pages deploy` mới đọc. Máy build của Cloudflare chạy `wrangler deploy`
+> (luồng Workers) nên báo `Missing entry-point to Worker script or to assets directory`. Cách sửa
+> là khai `[assets] directory = "./dist"` — xem `wrangler.toml`.
+
+**Cách 1 — nối Git, mỗi lần push là tự deploy.** Cloudflare Dashboard → Workers & Pages →
+Create → Import a repository → chọn `nvhbmt/cunpoi-tech`, rồi điền:
 
 | Trường | Giá trị |
 |---|---|
-| Framework preset | Astro |
+| Production branch | `main` |
 | Build command | `npm run build` |
-| Build output directory | `dist` |
-| Node version | `22` (đặt biến `NODE_VERSION=22` nếu bản mặc định cũ hơn) |
+| Deploy command | `npx wrangler deploy` |
+| Biến môi trường | `NODE_VERSION` = `22` |
 
 **Cách 2 — đẩy thẳng từ máy.**
 
 ```bash
 npm run build
-npx wrangler pages deploy dist --project-name cunpoi-tech
+npx wrangler deploy            # [assets] trong wrangler.toml đã trỏ ./dist
+npx wrangler deploy --dry-run  # thử trước, không đẩy gì lên
 ```
 
-**Gắn tên miền.** Pages → project → Custom domains → `cunpoi.tech` và `www.cunpoi.tech`.
-Nếu tên miền đã nằm trong tài khoản Cloudflare thì bản ghi DNS được tạo tự động; nếu chưa, trỏ
-`CNAME` theo hướng dẫn hiện trên màn hình. Chứng chỉ TLS Cloudflare tự cấp.
+**Gắn tên miền.** Project → Settings → Domains & Routes → Add → Custom domain → `cunpoi.tech`,
+làm lại lần nữa cho `www.cunpoi.tech`. Tên miền đã nằm sẵn trong tài khoản Cloudflare
+(nameserver `houston` / `sarah.ns.cloudflare.com`) nên bản ghi DNS và chứng chỉ TLS tự tạo.
 
-`public/_headers` đã đặt sẵn cache một năm cho `/_astro/*` (tên file có vân tay nên an toàn),
-không cache HTML, cùng vài header bảo mật cơ bản.
+`public/_headers` đặt cache một năm cho `/_astro/*` (tên file có vân tay nên an toàn), không cache
+HTML, cùng vài header bảo mật cơ bản — Workers static assets đọc file này giống hệt Pages.
 
 ## Việc còn để ngỏ
 

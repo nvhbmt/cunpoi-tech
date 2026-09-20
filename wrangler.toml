@@ -1,5 +1,16 @@
-# Cho phép đẩy thẳng bản build lên Cloudflare Pages:
-#   npm run build && npx wrangler pages deploy dist
+# Cloudflare Workers Static Assets.
+#
+# Trước đây file này khai `pages_build_output_dir`, nhưng khoá đó CHỈ có
+# `wrangler pages deploy` đọc. Máy build của Cloudflare chạy `wrangler deploy`
+# (luồng Workers) nên không thấy gì để triển khai và báo
+# "Missing entry-point to Worker script or to assets directory".
+#
+# Khai [assets] thì `wrangler deploy` hiểu đây là trang tĩnh thuần, không cần
+# Worker script nào cả.
 name = "cunpoi-tech"
 compatibility_date = "2026-09-20"
-pages_build_output_dir = "dist"
+
+[assets]
+directory = "./dist"
+# Đường dẫn không tồn tại → trả dist/404.html kèm mã 404.
+not_found_handling = "404-page"
