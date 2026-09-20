@@ -166,10 +166,10 @@ const vi: Content = {
     about: {
         n: '01',
         title: 'Giới thiệu',
-        lead: 'Vẫn là sinh viên năm 4, nhưng code đã chạy thật được một năm rưỡi.',
+        lead: 'Đang là sinh viên năm 4, nhưng code đã chạy thật được một năm rưỡi.',
         paragraphs: [
-            'Tôi là sinh viên năm 4 ngành Kỹ thuật phần mềm tại Đại học Công nghiệp TP.HCM (IUH). Từ năm 2025 tôi làm fullstack tại HDC Flowtech trên M-Agent (MOSA) — nền tảng AI Agent và tự động hoá quy trình cho khách hàng doanh nghiệp Nhật Bản — phụ trách cả ba module frontend và ba service backend, đồng thời dẫn một nhóm hai người.',
-            'Ngoài giờ làm, tôi tự thiết kế, viết và vận hành hệ thống của riêng mình: iExam hiện có hơn 500 giáo viên dùng để tổ chức thi, BCN Judge chấm bài trong sandbox Docker, và một hệ thi đua nề nếp cho trường THPT. Phần tôi thấy đáng làm nhất lại là phần người dùng không bao giờ nhìn thấy: đọc định dạng nhị phân, dựng sandbox, viết migration không đụng vào dữ liệu cũ, và test đủ nhiều để bấm deploy mà không phải hồi hộp.',
+            'Tôi là sinh viên năm 4 ngành Kỹ thuật phần mềm tại Đại học Công nghiệp TP.HCM (IUH). Từ năm 2025 tôi làm fullstack tại HDC Flowtech trên M-Agent (MOSA) — nền tảng AI Agent và tự động hoá quy trình cho khách hàng doanh nghiệp Nhật Bản — phụ trách **cả ba module frontend và ba service backend**, đồng thời **dẫn một nhóm hai người**.',
+            'Ngoài giờ làm, tôi **tự thiết kế, viết và vận hành** hệ thống của riêng mình: iExam hiện có **hơn 500 giáo viên** dùng để tổ chức thi, BCN Judge chấm bài trong sandbox Docker, và một hệ thi đua nề nếp cho trường THPT. Phần tôi thấy đáng làm nhất lại là phần người dùng không bao giờ nhìn thấy: đọc định dạng nhị phân, dựng sandbox, viết migration không đụng vào dữ liệu cũ, và test đủ nhiều để bấm deploy mà không phải hồi hộp.',
         ],
         pillars: [
             {
@@ -446,8 +446,8 @@ const en: Content = {
         title: 'About',
         lead: 'Final-year student — and eighteen months of shipping to production.',
         paragraphs: [
-            'I am a fourth-year Software Engineering student at Industrial University of Ho Chi Minh City (IUH). Since 2025 I have worked fullstack at HDC Flowtech on M-Agent (MOSA) — an AI agent and workflow automation platform for Japanese enterprise clients — owning all three frontend modules and three backend services while leading a team of two.',
-            'Outside work I design, write and operate my own systems: iExam runs real exams for more than 500 teachers, BCN Judge grades submissions inside Docker sandboxes, and a conduct-tracking system serves a high school. I like the hard parts users never see: binary parsers, sandboxes, safe migrations, and a test suite thick enough that pressing deploy is not a gamble.',
+            'I am a fourth-year Software Engineering student at Industrial University of Ho Chi Minh City (IUH). Since 2025 I have worked fullstack at HDC Flowtech on M-Agent (MOSA) — an AI agent and workflow automation platform for Japanese enterprise clients — owning **all three frontend modules and three backend services** while **leading a team of two**.',
+            'Outside work I **design, write and operate** my own systems: iExam runs real exams for **more than 500 teachers**, BCN Judge grades submissions inside Docker sandboxes, and a conduct-tracking system serves a high school. I like the hard parts users never see: binary parsers, sandboxes, safe migrations, and a test suite thick enough that pressing deploy is not a gamble.',
         ],
         pillars: [
             {

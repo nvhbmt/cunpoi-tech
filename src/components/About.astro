@@ -1,6 +1,7 @@
 ---
 import { content as allContent, type Lang } from '@/data/profile';
 import SectionHead from '@/components/SectionHead.astro';
+import { emphasise } from '@/lib/emphasise';
 
 interface Props {
     lang: Lang;
@@ -8,6 +9,7 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = allContent[lang];
+
 ---
 
 <section class="section" id="about">
@@ -16,7 +18,7 @@ const t = allContent[lang];
 
         <div class="about">
             <div class="about__text prose" data-reveal>
-                {t.about.paragraphs.map((p) => <p>{p}</p>)}
+                {t.about.paragraphs.map((p) => <p set:html={emphasise(p)} />)}
 
                 <dl class="about__edu">
                     <dt>{t.education.title}</dt>
@@ -60,6 +62,12 @@ const t = allContent[lang];
 
     .about__text {
         font-size: 1.02rem;
+    }
+
+    /* Chữ thường trong đoạn là --text-dim; phần in đậm sáng hẳn lên để nổi. */
+    .about__text :global(strong) {
+        color: var(--text);
+        font-weight: 600;
     }
 
     /* --- học vấn --- */
