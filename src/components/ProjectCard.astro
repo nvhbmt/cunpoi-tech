@@ -23,15 +23,13 @@ const { project, labels, index = 0, compact = false, featured = false } = Astro.
     <div class="card__glow" aria-hidden="true"></div>
 
     <header class="card__head">
-        <div class="card__title">
-            <h3>{project.name}</h3>
-            <p class="card__subtitle">{project.subtitle}</p>
-        </div>
+        <h3 class="card__name">{project.name}</h3>
         {project.badge && (
             <span class="card__badge" data-tone={project.tone ?? 'live'}>
                 {project.badge}
             </span>
         )}
+        <p class="card__subtitle">{project.subtitle}</p>
     </header>
 
     <p class="card__meta mono">
@@ -149,30 +147,39 @@ const { project, labels, index = 0, compact = false, featured = false } = Astro.
 
     /* --- đầu thẻ --- */
 
+    /*
+     * Tên và nhãn nằm chung hàng trên, phụ đề chiếm trọn hàng dưới.
+     * Trước đây tên + phụ đề bị gói chung một ô flex cạnh nhãn, nên ô ấy co lại
+     * và phụ đề xuống dòng sớm thay vì trải hết chiều ngang thẻ.
+     */
     .card__head {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 1rem;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: start;
+        column-gap: 1rem;
+        row-gap: 0.3rem;
     }
 
-    .card__title h3 {
+    .card__name {
+        grid-area: 1 / 1;
         font-size: clamp(1.2rem, 1rem + 0.7vw, 1.55rem);
         letter-spacing: -0.03em;
+        min-width: 0;
     }
 
     .card__subtitle {
+        grid-area: 2 / 1 / 3 / -1;
         color: var(--text-mut);
         font-size: 0.9rem;
         line-height: 1.45;
-        margin-top: 0.3rem;
     }
 
     .card__badge {
         --tone-fg: var(--mint);
         --tone-bd: rgba(94, 234, 212, 0.35);
         --tone-bg: rgba(94, 234, 212, 0.08);
-        flex-shrink: 0;
+        grid-area: 1 / 2;
+        justify-self: end;
         font-family: var(--font-mono);
         font-size: 0.64rem;
         letter-spacing: 0.1em;
@@ -313,7 +320,7 @@ const { project, labels, index = 0, compact = false, featured = false } = Astro.
         padding: clamp(1.6rem, 3.2vw, 2.6rem);
     }
 
-    .card--featured .card__title h3 {
+    .card--featured .card__name {
         font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.2rem);
     }
 
@@ -336,6 +343,30 @@ const { project, labels, index = 0, compact = false, featured = false } = Astro.
 
     .card--compact {
         border-radius: 14px;
+    }
+
+    /*
+     * Màn hẹp: nhãn chiếm hàng riêng phía trên. Để chung hàng với tên thì
+     * nhãn dài ("Nội bộ doanh nghiệp") bóp tên xuống còn vài ký tự một dòng.
+     */
+    @media (max-width: 560px) {
+        .card__head {
+            grid-template-columns: minmax(0, 1fr);
+            row-gap: 0.5rem;
+        }
+
+        .card__badge {
+            grid-area: 1 / 1;
+            justify-self: start;
+        }
+
+        .card__name {
+            grid-area: 2 / 1;
+        }
+
+        .card__subtitle {
+            grid-area: 3 / 1 / 4 / -1;
+        }
     }
 
     /* Màn hẹp: dòng meta xuống hàng, bỏ dấu chấm giữa kẻo nó rơi trơ một mình. */
