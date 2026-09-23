@@ -1,5 +1,5 @@
 ---
-import { content as allContent, site, type Lang } from '@/data/profile';
+import { content as allContent, homePath, site, type Lang } from '@/data/profile';
 
 interface Props {
     lang: Lang;
@@ -7,13 +7,15 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = allContent[lang];
-const home = lang === 'vi' ? '/' : '/en';
+const home = homePath(lang);
 
+// Mục "Nhận xét" chỉ có mặt khi mục đó thật sự được dựng ra, kẻo bấm vào rơi vào hư không.
 const items = [
     { id: 'about', label: t.nav.about },
     { id: 'work', label: t.nav.work },
     { id: 'projects', label: t.nav.projects },
     { id: 'skills', label: t.nav.skills },
+    ...(t.testimonials.show ? [{ id: 'testimonials', label: t.navTestimonials }] : []),
     { id: 'contact', label: t.nav.contact },
 ];
 ---

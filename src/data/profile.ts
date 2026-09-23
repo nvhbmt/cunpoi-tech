@@ -6,6 +6,18 @@
 export const LANGS = ['vi', 'en'] as const;
 export type Lang = (typeof LANGS)[number];
 
+/**
+ * Đường dẫn trang chủ của từng ngôn ngữ, luôn có dấu `/` cuối.
+ *
+ * Astro dựng ra `dist/en/index.html`, sitemap khai `/en/`, và Cloudflare tự
+ * chuyển hướng `/en` sang `/en/`. Nếu thẻ canonical lại ghi `/en` thì ba nơi nói
+ * ba kiểu, Google đọc được một trang dưới hai địa chỉ. Mọi nơi trong mã lấy
+ * đường dẫn từ hàm này để không còn chỗ nào lệch.
+ */
+export function homePath(lang: Lang): string {
+    return lang === 'vi' ? '/' : `/${lang}/`;
+}
+
 export const site = {
     domain: 'cunpoi.tech',
     url: 'https://cunpoi.tech',
@@ -14,6 +26,9 @@ export const site = {
     email: 'hoangnguyen1157@gmail.com',
     github: 'https://github.com/nvhbmt',
     githubHandle: 'nvhbmt',
+    // TODO: thay bằng đường dẫn hồ sơ thật, ví dụ https://www.linkedin.com/in/nvhbmt/
+    // Để trống chuỗi này thì mọi chỗ hiển thị LinkedIn tự ẩn đi, không có liên kết chết.
+    linkedin: 'https://www.linkedin.com/in/',
     cv: '/cv/CV_Nguyen_Viet_Hoang_Fullstack.pdf',
     live: 'https://iexam.vn',
     themeColor: '#05070c',
@@ -30,6 +45,24 @@ export interface ProjectLink {
     kind: 'live' | 'code';
 }
 
+/**
+ * Ảnh chụp màn hình của dự án.
+ *
+ * Chưa có ảnh thật thì để trống cả trường `shot` — thẻ tự vẽ một ô giữ chỗ,
+ * khung HTML và kích thước đã sẵn nên lúc thả ảnh vào bố cục không xê dịch.
+ */
+export interface Shot {
+    /** Ảnh nền, định dạng phổ thông (.png/.jpg) — luôn phải có. */
+    src: string;
+    /** Bản .webp nhẹ hơn, trình duyệt nào hiểu thì lấy bản này trước. */
+    webp?: string;
+    /** Kích thước thật của ảnh, tính bằng pixel — đặt sẵn để khỏi giật bố cục. */
+    width: number;
+    height: number;
+    /** Mô tả nội dung ảnh, viết theo ngôn ngữ của trang. */
+    alt: string;
+}
+
 export interface Project {
     key: string;
     name: string;
@@ -41,6 +74,8 @@ export interface Project {
     stack: string[];
     metrics: Metric[];
     links: ProjectLink[];
+    /** Ảnh chụp màn hình; bỏ trống thì thẻ hiện ô giữ chỗ. */
+    shot?: Shot;
     /** Nhãn nhỏ góc thẻ: đang chạy thật, đang làm, đã xong… */
     badge?: string;
     /** Repo để riêng tư — hiện nhãn thay vì một liên kết chết. */
@@ -49,12 +84,39 @@ export interface Project {
     tone?: 'live' | 'wip' | 'closed';
 }
 
+/**
+ * Mức độ thành thạo, quyết định cả thứ tự lẫn màu của nhóm kỹ năng.
+ * `daily` đậm nhất, `learning` chỉ viền mờ — người đọc lướt là thấy ngay
+ * cái nào tôi gõ mỗi ngày, cái nào mới chỉ nghịch qua.
+ */
+export type SkillLevel = 'daily' | 'shipped' | 'learning';
+
+export interface SkillTier {
+    level: SkillLevel;
+    title: string;
+    /** Một dòng giải thích "đủ nhiều" nghĩa là gì ở mức này. */
+    note: string;
+    items: string[];
+}
+
+export interface Testimonial {
+    /** Nội dung lời nhận xét, không kèm dấu ngoặc kép — CSS tự thêm. */
+    quote: string;
+    name: string;
+    role: string;
+    company: string;
+    /** Ảnh đại diện; bỏ trống thì dùng chữ cái đầu của tên. */
+    avatar?: string;
+}
+
 export interface Content {
     htmlLang: string;
     label: string;
     switchTo: { href: string; label: string; aria: string };
     meta: { title: string; description: string; keywords: string };
     nav: { about: string; work: string; projects: string; skills: string; contact: string };
+    /** Nhãn mục "lời nhận xét" trên thanh điều hướng — chỉ hiện khi mục đó bật. */
+    navTestimonials: string;
     skipToContent: string;
     hero: {
         eyebrow: string;
@@ -96,12 +158,34 @@ export interface Content {
         viewLive: string;
         privateRepo: string;
         moreOnGithub: string;
+        /** Chữ trong ô giữ chỗ khi dự án chưa có ảnh chụp màn hình. */
+        shotSoon: string;
     };
     skills: {
         n: string;
         title: string;
         lead: string;
-        groups: { title: string; items: string[] }[];
+        /** Ba bậc theo mức độ dùng thật, xếp từ thành thạo nhất xuống. */
+        tiers: SkillTier[];
+        /**
+         * Quy trình và ngoại ngữ không nằm trên cùng một thước đo với thư viện,
+         * nên để riêng phía dưới thay vì nhét bừa vào một bậc nào đó.
+         */
+        aside: { title: string; items: string[] }[];
+    };
+    testimonials: {
+        /*
+         * Cố tình không có số thứ tự: dãy 01–05 của trang giữ nguyên dù mục này
+         * bật hay tắt, khỏi phải đánh số lại mỗi lần đổi ý.
+         */
+        title: string;
+        lead: string;
+        /**
+         * Bật lên khi đã có lời nhận xét thật. Để `false` thì cả mục biến mất
+         * khỏi trang — thà thiếu còn hơn trưng lời khen bịa ra cho có.
+         */
+        show: boolean;
+        items: Testimonial[];
     };
     education: {
         title: string;
@@ -117,8 +201,21 @@ export interface Content {
         body: string;
         emailLabel: string;
         githubLabel: string;
+        linkedinLabel: string;
         cvLabel: string;
         liveLabel: string;
+        form: {
+            title: string;
+            name: { label: string; placeholder: string; error: string };
+            email: { label: string; placeholder: string; error: string; invalid: string };
+            message: { label: string; placeholder: string; error: string };
+            submit: string;
+            sending: string;
+            ok: string;
+            fail: string;
+            /** Hiện khi chưa điền khoá API — biểu mẫu tự chuyển sang mời gửi email. */
+            unconfigured: string;
+        };
     };
     footer: { built: string; rights: string };
 }
@@ -130,7 +227,7 @@ export interface Content {
 const vi: Content = {
     htmlLang: 'vi',
     label: 'Tiếng Việt',
-    switchTo: { href: '/en', label: 'EN', aria: 'Switch to English' },
+    switchTo: { href: '/en/', label: 'EN', aria: 'Switch to English' },
     meta: {
         title: 'Nguyễn Việt Hoàng — Fullstack Developer',
         description:
@@ -145,6 +242,7 @@ const vi: Content = {
         skills: 'Kỹ năng',
         contact: 'Liên hệ',
     },
+    navTestimonials: 'Nhận xét',
     skipToContent: 'Bỏ qua, tới nội dung chính',
     hero: {
         eyebrow: 'Fullstack Developer · TP. Hồ Chí Minh',
@@ -265,6 +363,7 @@ const vi: Content = {
         viewLive: 'Xem trang thật',
         privateRepo: 'Mã nguồn để riêng tư — mở ra xem được khi phỏng vấn',
         moreOnGithub: 'GitHub của tôi',
+        shotSoon: 'Ảnh màn hình sắp bổ sung',
         items: [
             {
                 key: 'iexam',
@@ -287,6 +386,22 @@ const vi: Content = {
                     { value: 'Tự động', label: 'chấm xong ngay khi học sinh nộp bài' },
                     { value: '06/2026', label: 'chạy thật liên tục từ' },
                 ],
+                /*
+                 * TODO — ảnh chụp màn hình: đặt file vào `public/shots/iexam.png`
+                 * (kèm `iexam.webp` nếu xuất được) rồi mở khối dưới đây:
+                 *
+                 *   shot: {
+                 *       src: '/shots/iexam.png',
+                 *       webp: '/shots/iexam.webp',
+                 *       width: 1600,
+                 *       height: 1000,
+                 *       alt: '…mô tả đúng thứ đang có trên ảnh…',
+                 *   },
+                 *
+                 * `width`/`height` phải là kích thước thật của file: thẻ dùng nó để
+                 * chừa sẵn chỗ, thiếu là ảnh tải xong sẽ đẩy nội dung nhảy xuống.
+                 * Chưa mở thì thẻ hiện ô giữ chỗ, bố cục vẫn y như khi đã có ảnh.
+                 */
                 links: [{ label: 'iexam.vn', href: 'https://iexam.vn', kind: 'live' }],
                 privateRepo: true,
                 badge: 'Đang chạy thật',
@@ -313,6 +428,22 @@ const vi: Content = {
                     { value: 'Hàng tuần', label: 'contest có bảng xếp hạng' },
                     { value: 'Discord', label: 'đăng nhập, không phải tạo tài khoản mới' },
                 ],
+                /*
+                 * TODO — ảnh chụp màn hình: đặt file vào `public/shots/bcn-judge.png`
+                 * (kèm `bcn-judge.webp` nếu xuất được) rồi mở khối dưới đây:
+                 *
+                 *   shot: {
+                 *       src: '/shots/bcn-judge.png',
+                 *       webp: '/shots/bcn-judge.webp',
+                 *       width: 1600,
+                 *       height: 1000,
+                 *       alt: '…mô tả đúng thứ đang có trên ảnh…',
+                 *   },
+                 *
+                 * `width`/`height` phải là kích thước thật của file: thẻ dùng nó để
+                 * chừa sẵn chỗ, thiếu là ảnh tải xong sẽ đẩy nội dung nhảy xuống.
+                 * Chưa mở thì thẻ hiện ô giữ chỗ, bố cục vẫn y như khi đã có ảnh.
+                 */
                 links: [{ label: 'GitHub', href: 'https://github.com/nvhbmt/bcn-judge', kind: 'code' }],
                 badge: 'Đang chạy thật',
                 tone: 'live',
@@ -337,6 +468,22 @@ const vi: Content = {
                     { value: 'Quét QR', label: 'tra cứu học sinh tại chỗ' },
                     { value: '1 app', label: 'Cờ đỏ, trực ban, sổ đầu bài, Đoàn' },
                 ],
+                /*
+                 * TODO — ảnh chụp màn hình: đặt file vào `public/shots/tonglenh.png`
+                 * (kèm `tonglenh.webp` nếu xuất được) rồi mở khối dưới đây:
+                 *
+                 *   shot: {
+                 *       src: '/shots/tonglenh.png',
+                 *       webp: '/shots/tonglenh.webp',
+                 *       width: 1600,
+                 *       height: 1000,
+                 *       alt: '…mô tả đúng thứ đang có trên ảnh…',
+                 *   },
+                 *
+                 * `width`/`height` phải là kích thước thật của file: thẻ dùng nó để
+                 * chừa sẵn chỗ, thiếu là ảnh tải xong sẽ đẩy nội dung nhảy xuống.
+                 * Chưa mở thì thẻ hiện ô giữ chỗ, bố cục vẫn y như khi đã có ảnh.
+                 */
                 links: [],
                 privateRepo: true,
                 badge: 'Đang chạy thật',
@@ -347,24 +494,72 @@ const vi: Content = {
     skills: {
         n: '04',
         title: 'Kỹ năng',
-        lead: 'Những thứ tôi dùng đủ nhiều để dám nhận việc.',
-        groups: [
+        lead: 'Chia theo mức tôi thật sự dùng, không phải theo danh sách nghe cho oai.',
+        tiers: [
             {
-                title: 'Frontend',
-                items: ['React 19', 'Next.js 15/16', 'TypeScript', 'Vite', 'Astro', 'Tailwind CSS v3/v4', 'Zustand', 'TanStack Query', 'React Router', 'Radix UI', 'Framer Motion'],
+                level: 'daily',
+                title: 'Dùng hằng ngày',
+                note: 'Mở máy lên là gõ. Nhận việc gấp bằng những thứ này thì tôi không phải tra cứu.',
+                items: [
+                    'React 19',
+                    'TypeScript',
+                    'Next.js 15/16',
+                    'Vite',
+                    'Tailwind CSS v3/v4',
+                    'Go (Golang)',
+                    'Hono',
+                    'Python · FastAPI',
+                    'Node.js',
+                    'PostgreSQL',
+                    'Drizzle ORM',
+                    'Zustand',
+                    'TanStack Query',
+                    'Docker',
+                    'Git',
+                ],
             },
             {
-                title: 'Backend',
-                items: ['Go (Golang)', 'gRPC · Protobuf', 'Hono', 'Python · FastAPI', 'Node.js', 'REST API', 'Kiến trúc microservice', 'PostgreSQL · Drizzle · Prisma'],
+                level: 'shipped',
+                title: 'Đã dùng trong dự án thật',
+                note: 'Đủ để đưa lên chạy thật và tự sửa khi hỏng, nhưng không phải tuần nào cũng đụng.',
+                items: [
+                    'gRPC · Protobuf',
+                    'Kiến trúc microservice',
+                    'Prisma',
+                    'Astro',
+                    'React Router',
+                    'Radix UI',
+                    'XYFlow',
+                    'KaTeX',
+                    'TipTap',
+                    'PWA',
+                    'Three.js',
+                    'Recharts',
+                    'PDF.js',
+                    'GitLab CI/CD',
+                    'GitHub Actions',
+                    'Vitest · Playwright',
+                    'Husky · commitlint',
+                    'ESLint · Prettier',
+                    'MinIO',
+                ],
             },
             {
-                title: 'Thư viện chuyên biệt',
-                items: ['XYFlow', 'Three.js', 'Recharts · ApexCharts', 'TipTap · Milkdown · Lexical', 'DnD Kit', 'FullCalendar', 'Mermaid', 'KaTeX', 'PDF.js'],
+                level: 'learning',
+                title: 'Đã thử · đang học',
+                note: 'Làm được việc nhỏ hoặc mới dựng thử. Nhận việc chính bằng mấy thứ này thì tôi nói trước.',
+                items: [
+                    'Milkdown · Lexical',
+                    'ApexCharts',
+                    'DnD Kit',
+                    'FullCalendar',
+                    'Mermaid',
+                    'Framer Motion',
+                    'Sentry',
+                ],
             },
-            {
-                title: 'DevOps & công cụ',
-                items: ['Docker', 'GitLab CI/CD', 'GitHub Actions', 'Git', 'Husky · commitlint', 'ESLint · Prettier', 'Vitest · Playwright', 'Sentry', 'MinIO'],
-            },
+        ],
+        aside: [
             {
                 title: 'Quy trình',
                 items: ['Jira', 'Agile / Scrum', 'Code review · Merge request', 'Đặc tả và thiết kế trước khi code', 'Dẫn nhóm nhỏ'],
@@ -372,6 +567,31 @@ const vi: Content = {
             {
                 title: 'Ngôn ngữ',
                 items: ['Tiếng Việt (bản ngữ)', 'Tiếng Anh (đọc viết tài liệu kỹ thuật)'],
+            },
+        ],
+    },
+    testimonials: {
+        title: 'Người từng làm cùng nói gì',
+        lead: 'Vài dòng từ người đã dùng sản phẩm hoặc đã ngồi review code của tôi.',
+        /*
+         * TODO: xin lời nhận xét thật (quản lý ở HDC Flowtech, giáo viên đang dùng
+         * iExam, ban chủ nhiệm câu lạc bộ), điền vào `items` rồi đổi `show` thành
+         * `true`. Chừng nào chưa có thì để nguyên `false`: trưng lời khen tự bịa
+         * lên trang cá nhân là nói dối người đọc, hại nhiều hơn lợi.
+         */
+        show: false,
+        items: [
+            {
+                quote: 'TODO — thay bằng lời nhận xét thật, giữ nguyên giọng của người nói.',
+                name: 'TODO — họ tên',
+                role: 'TODO — chức danh',
+                company: 'TODO — nơi làm việc',
+            },
+            {
+                quote: 'TODO — thay bằng lời nhận xét thật, giữ nguyên giọng của người nói.',
+                name: 'TODO — họ tên',
+                role: 'TODO — chức danh',
+                company: 'TODO — nơi làm việc',
             },
         ],
     },
@@ -391,8 +611,33 @@ const vi: Content = {
         body: 'Tôi đang làm toàn thời gian tại HDC Flowtech nên chỉ nhận thêm việc bán thời gian hoặc freelance — thường là những dự án quy mô nhỏ, không cần phân biệt rõ frontend hay backend. Bạn cứ gửi phạm vi công việc và thời hạn, tôi trả lời trong ngày.',
         emailLabel: 'Gửi email',
         githubLabel: 'GitHub',
+        linkedinLabel: 'LinkedIn',
         cvLabel: 'Tải CV (PDF)',
         liveLabel: 'Sản phẩm đang chạy',
+        form: {
+            title: 'Hoặc nhắn thẳng ở đây',
+            name: {
+                label: 'Họ tên',
+                placeholder: 'Nguyễn Văn A',
+                error: 'Cho tôi xin tên bạn với.',
+            },
+            email: {
+                label: 'Email',
+                placeholder: 'ban@congty.com',
+                error: 'Cần email để tôi trả lời bạn.',
+                invalid: 'Email này trông chưa đúng — kiểm tra lại giúp tôi.',
+            },
+            message: {
+                label: 'Lời nhắn',
+                placeholder: 'Phạm vi công việc, thời hạn mong muốn, ngân sách nếu có…',
+                error: 'Viết vài dòng về việc bạn cần nhé.',
+            },
+            submit: 'Gửi',
+            sending: 'Đang gửi…',
+            ok: 'Đã gửi, cảm ơn bạn! Tôi trả lời trong ngày.',
+            fail: 'Gửi không được. Bạn email thẳng cho tôi giúp nhé.',
+            unconfigured: 'Biểu mẫu chưa nối với dịch vụ gửi thư — bạn email thẳng cho tôi nhé.',
+        },
     },
     footer: {
         built: 'Dựng bằng Astro và Three.js · trang tĩnh, không theo dõi người dùng',
@@ -422,6 +667,7 @@ const en: Content = {
         skills: 'Skills',
         contact: 'Contact',
     },
+    navTestimonials: 'Recommendations',
     skipToContent: 'Skip to main content',
     hero: {
         eyebrow: 'Fullstack Developer · Ho Chi Minh City',
@@ -542,6 +788,7 @@ const en: Content = {
         viewLive: 'Visit site',
         privateRepo: 'Private repository — happy to walk through it in an interview',
         moreOnGithub: 'My GitHub',
+        shotSoon: 'Screenshot coming soon',
         items: [
             {
                 key: 'iexam',
@@ -564,6 +811,22 @@ const en: Content = {
                     { value: 'Instant', label: 'marking the moment a student submits' },
                     { value: '06/2026', label: 'running in production since' },
                 ],
+                /*
+                 * TODO — ảnh chụp màn hình: đặt file vào `public/shots/iexam.png`
+                 * (kèm `iexam.webp` nếu xuất được) rồi mở khối dưới đây:
+                 *
+                 *   shot: {
+                 *       src: '/shots/iexam.png',
+                 *       webp: '/shots/iexam.webp',
+                 *       width: 1600,
+                 *       height: 1000,
+                 *       alt: '…mô tả đúng thứ đang có trên ảnh…',
+                 *   },
+                 *
+                 * `width`/`height` phải là kích thước thật của file: thẻ dùng nó để
+                 * chừa sẵn chỗ, thiếu là ảnh tải xong sẽ đẩy nội dung nhảy xuống.
+                 * Chưa mở thì thẻ hiện ô giữ chỗ, bố cục vẫn y như khi đã có ảnh.
+                 */
                 links: [{ label: 'iexam.vn', href: 'https://iexam.vn', kind: 'live' }],
                 privateRepo: true,
                 badge: 'Live in production',
@@ -590,6 +853,22 @@ const en: Content = {
                     { value: 'Weekly', label: 'contests with a live scoreboard' },
                     { value: 'Discord', label: 'login, no new account needed' },
                 ],
+                /*
+                 * TODO — ảnh chụp màn hình: đặt file vào `public/shots/bcn-judge.png`
+                 * (kèm `bcn-judge.webp` nếu xuất được) rồi mở khối dưới đây:
+                 *
+                 *   shot: {
+                 *       src: '/shots/bcn-judge.png',
+                 *       webp: '/shots/bcn-judge.webp',
+                 *       width: 1600,
+                 *       height: 1000,
+                 *       alt: '…mô tả đúng thứ đang có trên ảnh…',
+                 *   },
+                 *
+                 * `width`/`height` phải là kích thước thật của file: thẻ dùng nó để
+                 * chừa sẵn chỗ, thiếu là ảnh tải xong sẽ đẩy nội dung nhảy xuống.
+                 * Chưa mở thì thẻ hiện ô giữ chỗ, bố cục vẫn y như khi đã có ảnh.
+                 */
                 links: [{ label: 'GitHub', href: 'https://github.com/nvhbmt/bcn-judge', kind: 'code' }],
                 badge: 'Live in production',
                 tone: 'live',
@@ -614,6 +893,22 @@ const en: Content = {
                     { value: 'QR scan', label: 'pull up any student on the spot' },
                     { value: '1 app', label: 'monitors, day book and union duties' },
                 ],
+                /*
+                 * TODO — ảnh chụp màn hình: đặt file vào `public/shots/tonglenh.png`
+                 * (kèm `tonglenh.webp` nếu xuất được) rồi mở khối dưới đây:
+                 *
+                 *   shot: {
+                 *       src: '/shots/tonglenh.png',
+                 *       webp: '/shots/tonglenh.webp',
+                 *       width: 1600,
+                 *       height: 1000,
+                 *       alt: '…mô tả đúng thứ đang có trên ảnh…',
+                 *   },
+                 *
+                 * `width`/`height` phải là kích thước thật của file: thẻ dùng nó để
+                 * chừa sẵn chỗ, thiếu là ảnh tải xong sẽ đẩy nội dung nhảy xuống.
+                 * Chưa mở thì thẻ hiện ô giữ chỗ, bố cục vẫn y như khi đã có ảnh.
+                 */
                 links: [],
                 privateRepo: true,
                 badge: 'Live in production',
@@ -624,24 +919,72 @@ const en: Content = {
     skills: {
         n: '04',
         title: 'Skills',
-        lead: 'The things I have used enough to take a job on.',
-        groups: [
+        lead: 'Sorted by how much I actually use them, not by how good the list looks.',
+        tiers: [
             {
-                title: 'Frontend',
-                items: ['React 19', 'Next.js 15/16', 'TypeScript', 'Vite', 'Astro', 'Tailwind CSS v3/v4', 'Zustand', 'TanStack Query', 'React Router', 'Radix UI', 'Framer Motion'],
+                level: 'daily',
+                title: 'Daily drivers',
+                note: 'What I open the editor to. Hand me urgent work in these and I will not be reading docs.',
+                items: [
+                    'React 19',
+                    'TypeScript',
+                    'Next.js 15/16',
+                    'Vite',
+                    'Tailwind CSS v3/v4',
+                    'Go (Golang)',
+                    'Hono',
+                    'Python · FastAPI',
+                    'Node.js',
+                    'PostgreSQL',
+                    'Drizzle ORM',
+                    'Zustand',
+                    'TanStack Query',
+                    'Docker',
+                    'Git',
+                ],
             },
             {
-                title: 'Backend',
-                items: ['Go (Golang)', 'gRPC · Protobuf', 'Hono', 'Python · FastAPI', 'Node.js', 'REST APIs', 'Microservice architecture', 'PostgreSQL · Drizzle · Prisma'],
+                level: 'shipped',
+                title: 'Shipped in real projects',
+                note: 'Enough to put it in production and fix it when it breaks — just not every week.',
+                items: [
+                    'gRPC · Protobuf',
+                    'Microservice architecture',
+                    'Prisma',
+                    'Astro',
+                    'React Router',
+                    'Radix UI',
+                    'XYFlow',
+                    'KaTeX',
+                    'TipTap',
+                    'PWA',
+                    'Three.js',
+                    'Recharts',
+                    'PDF.js',
+                    'GitLab CI/CD',
+                    'GitHub Actions',
+                    'Vitest · Playwright',
+                    'Husky · commitlint',
+                    'ESLint · Prettier',
+                    'MinIO',
+                ],
             },
             {
-                title: 'Specialised libraries',
-                items: ['XYFlow', 'Three.js', 'Recharts · ApexCharts', 'TipTap · Milkdown · Lexical', 'DnD Kit', 'FullCalendar', 'Mermaid', 'KaTeX', 'PDF.js'],
+                level: 'learning',
+                title: 'Tried · learning',
+                note: 'Small jobs or prototypes so far. If a project leans on these, I will say so upfront.',
+                items: [
+                    'Milkdown · Lexical',
+                    'ApexCharts',
+                    'DnD Kit',
+                    'FullCalendar',
+                    'Mermaid',
+                    'Framer Motion',
+                    'Sentry',
+                ],
             },
-            {
-                title: 'DevOps & tooling',
-                items: ['Docker', 'GitLab CI/CD', 'GitHub Actions', 'Git', 'Husky · commitlint', 'ESLint · Prettier', 'Vitest · Playwright', 'Sentry', 'MinIO'],
-            },
+        ],
+        aside: [
             {
                 title: 'Process',
                 items: ['Jira', 'Agile / Scrum', 'Code review · merge requests', 'Spec and design before code', 'Leading a small team'],
@@ -649,6 +992,26 @@ const en: Content = {
             {
                 title: 'Languages',
                 items: ['Vietnamese (native)', 'English (technical reading and writing)'],
+            },
+        ],
+    },
+    testimonials: {
+        title: 'What people I worked with say',
+        lead: 'A few words from people who used the products or reviewed the code.',
+        // TODO: xem ghi chú ở bản tiếng Việt — hai bản phải bật cùng lúc.
+        show: false,
+        items: [
+            {
+                quote: 'TODO — replace with a real quote, in the speaker’s own words.',
+                name: 'TODO — full name',
+                role: 'TODO — job title',
+                company: 'TODO — company',
+            },
+            {
+                quote: 'TODO — replace with a real quote, in the speaker’s own words.',
+                name: 'TODO — full name',
+                role: 'TODO — job title',
+                company: 'TODO — company',
             },
         ],
     },
@@ -668,8 +1031,33 @@ const en: Content = {
         body: 'I work full-time at HDC Flowtech, so I only take on part-time or freelance work — usually small-scale projects, frontend or backend alike. Send me the scope and the timeline; I reply the same day.',
         emailLabel: 'Send an email',
         githubLabel: 'GitHub',
+        linkedinLabel: 'LinkedIn',
         cvLabel: 'Download CV (PDF)',
         liveLabel: 'See it running',
+        form: {
+            title: 'Or write to me right here',
+            name: {
+                label: 'Name',
+                placeholder: 'Jane Doe',
+                error: 'Please tell me your name.',
+            },
+            email: {
+                label: 'Email',
+                placeholder: 'you@company.com',
+                error: 'I need an email to reply to.',
+                invalid: 'That email does not look right — mind checking it?',
+            },
+            message: {
+                label: 'Message',
+                placeholder: 'Scope, timeline, budget if you have one…',
+                error: 'A couple of lines about the work, please.',
+            },
+            submit: 'Send',
+            sending: 'Sending…',
+            ok: 'Sent — thank you! I reply the same day.',
+            fail: 'That did not go through. Please email me directly instead.',
+            unconfigured: 'This form is not wired to a mail service yet — please email me directly.',
+        },
     },
     footer: {
         built: 'Built with Astro and Three.js · static, no tracking',

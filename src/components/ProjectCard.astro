@@ -4,14 +4,25 @@ import type { Project } from '@/data/profile';
 interface Props {
     project: Project;
     /** Nhãn cho liên kết, lấy từ ngôn ngữ đang hiển thị. */
-    labels: { viewCode: string; viewLive: string; privateRepo: string };
+    labels: { viewCode: string; viewLive: string; privateRepo: string; shotSoon: string };
     index?: number;
     compact?: boolean;
     /** Thẻ chiếm trọn hàng: chữ to hơn, gạch đầu dòng chia hai cột. */
     featured?: boolean;
+    /** Sản phẩm nội bộ trong mục Kinh nghiệm không có ảnh để khoe — tắt hẳn ô ảnh. */
+    withShot?: boolean;
 }
 
-const { project, labels, index = 0, compact = false, featured = false } = Astro.props;
+const {
+    project,
+    labels,
+    index = 0,
+    compact = false,
+    featured = false,
+    withShot = true,
+} = Astro.props;
+
+const shot = project.shot;
 ---
 
 <article
@@ -21,6 +32,40 @@ const { project, labels, index = 0, compact = false, featured = false } = Astro.
     style={`--reveal-delay:${index * 110}ms`}
 >
     <div class="card__glow" aria-hidden="true"></div>
+
+    {
+        withShot && (
+            <div class="card__shot">
+                {shot ? (
+                    <picture>
+                        {/* .webp nhẹ hơn nhiều; trình duyệt cũ tự bỏ qua <source> và lấy <img>. */}
+                        {shot.webp && <source srcset={shot.webp} type="image/webp" />}
+                        <img
+                            src={shot.src}
+                            alt={shot.alt}
+                            width={shot.width}
+                            height={shot.height}
+                            loading="lazy"
+                            decoding="async"
+                        />
+                    </picture>
+                ) : (
+                    /*
+                     * Ô giữ chỗ giữ đúng tỉ lệ khung ảnh thật, nên lúc thả ảnh vào
+                     * chiều cao thẻ không đổi — bố cục quanh nó không xê dịch.
+                     */
+                    <p class="card__shot-soon mono">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                            <rect x="3" y="5" width="18" height="14" rx="2" />
+                            <circle cx="8.5" cy="10" r="1.5" />
+                            <path d="m4 17 5-4.5 4 3.5 3-2.5 4 3.5" />
+                        </svg>
+                        {labels.shotSoon}
+                    </p>
+                )}
+            </div>
+        )
+    }
 
     <header class="card__head">
         <h3 class="card__name">{project.name}</h3>
@@ -143,6 +188,66 @@ const { project, labels, index = 0, compact = false, featured = false } = Astro.
 
     .card:hover .card__glow {
         opacity: 1;
+    }
+
+    /* --- ảnh chụp màn hình --- */
+
+    /*
+     * Tỉ lệ cố định cho cả ảnh thật lẫn ô giữ chỗ. Nhờ vậy thẻ cao đúng bằng nhau
+     * dù dự án này đã có ảnh còn dự án kia thì chưa.
+     */
+    .card__shot {
+        position: relative;
+        aspect-ratio: 16 / 10;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+        background:
+            linear-gradient(150deg, rgba(110, 168, 255, 0.07), rgba(10, 14, 23, 0.7) 60%);
+    }
+
+    .card__shot picture,
+    .card__shot img {
+        width: 100%;
+        height: 100%;
+    }
+
+    /*
+     * Ảnh chụp màn hình gần như luôn quan trọng nhất ở mép trên (thanh điều hướng,
+     * tiêu đề), nên khi phải cắt thì cắt từ dưới lên.
+     */
+    .card__shot img {
+        object-fit: cover;
+        object-position: top center;
+    }
+
+    .card__shot-soon {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.55rem;
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-mut);
+        /* Vạch chéo rất mờ: nhìn là biết ô này cố ý trống, không phải ảnh lỗi. */
+        background-image: repeating-linear-gradient(
+            -45deg,
+            rgba(146, 172, 220, 0.045) 0 10px,
+            transparent 10px 20px
+        );
+    }
+
+    .card__shot-soon svg {
+        opacity: 0.55;
+    }
+
+    /* Thẻ trải hết hàng thì ảnh 16/10 cao quá — hạ trần chiều cao lại. */
+    .card--featured .card__shot {
+        max-height: 22rem;
     }
 
     /* --- đầu thẻ --- */

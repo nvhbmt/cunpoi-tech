@@ -1,5 +1,5 @@
 ---
-import { content as allContent, site, type Lang } from '@/data/profile';
+import { content as allContent, homePath, site, type Lang } from '@/data/profile';
 
 interface Props {
     lang: Lang;
@@ -8,6 +8,9 @@ interface Props {
 const { lang } = Astro.props;
 const t = allContent[lang];
 const year = new Date().getFullYear();
+
+// Cùng một luật với mục Liên hệ: chưa có đường dẫn thật thì không hiện nút.
+const hasLinkedin = site.linkedin !== 'https://www.linkedin.com/in/';
 ---
 
 <footer class="foot">
@@ -15,8 +18,49 @@ const year = new Date().getFullYear();
         <p class="foot__left">
             <span class="mono">© {year} {t.footer.rights}</span>
             <span class="foot__sep" aria-hidden="true">·</span>
-            <a class="mono foot__domain" href={lang === 'vi' ? '/' : '/en'}>{site.domain}</a>
+            <a class="mono foot__domain" href={homePath(lang)}>{site.domain}</a>
         </p>
+        <p class="foot__social">
+            <a
+                class="foot__icon"
+                href={site.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`GitHub — ${site.author}`}
+            >
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true">
+                    <path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" />
+                </svg>
+            </a>
+
+            {
+                hasLinkedin && (
+                    <a
+                        class="foot__icon"
+                        href={site.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`LinkedIn — ${site.author}`}
+                    >
+                        <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true">
+                            <path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9.25h4v11.5H3zM10 9.25h3.83v1.57h.06A4.2 4.2 0 0 1 17.7 9c4.1 0 4.86 2.6 4.86 5.98v5.77h-4v-5.12c0-1.22-.02-2.8-1.75-2.8-1.75 0-2.02 1.33-2.02 2.71v5.21h-4z" />
+                        </svg>
+                    </a>
+                )
+            }
+
+            <a
+                class="foot__icon"
+                href={`mailto:${site.email}`}
+                aria-label={`${t.contact.emailLabel} — ${site.email}`}
+            >
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                    <rect x="3" y="5" width="18" height="14" rx="2.5" />
+                    <path d="m3.8 7 7.1 5.3a2 2 0 0 0 2.2 0L20.2 7" />
+                </svg>
+            </a>
+        </p>
+
         <p class="foot__right mono">{t.footer.built}</p>
     </div>
 </footer>
@@ -56,5 +100,46 @@ const year = new Date().getFullYear();
 
     .foot__sep {
         opacity: 0.5;
+    }
+
+    .foot__social {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        /* Hàng biểu tượng nằm giữa, hai khối chữ đẩy ra hai mép. */
+        order: 0;
+    }
+
+    .foot__icon {
+        display: grid;
+        place-items: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 1px solid var(--line);
+        color: var(--text-mut);
+        transition:
+            color 0.3s var(--ease),
+            border-color 0.3s var(--ease),
+            background-color 0.3s var(--ease);
+    }
+
+    .foot__icon:hover {
+        color: var(--accent-soft);
+        border-color: rgba(110, 168, 255, 0.4);
+        background: rgba(110, 168, 255, 0.08);
+    }
+
+    /* Màn hẹp: ba khối xếp dọc, hàng biểu tượng xuống cuối cho dễ chạm. */
+    @media (max-width: 720px) {
+        .foot__inner {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .foot__social {
+            order: 1;
+            margin-top: 0.3rem;
+        }
     }
 </style>

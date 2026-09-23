@@ -1,0 +1,169 @@
+---
+import { content as allContent, type Lang } from '@/data/profile';
+import SectionHead from '@/components/SectionHead.astro';
+
+interface Props {
+    lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = allContent[lang];
+
+/** Chữ cái đầu của tên, dùng khi chưa có ảnh đại diện. */
+const initial = (name: string) => name.trim().charAt(0).toUpperCase();
+---
+
+{
+    /*
+     * Chưa có lời nhận xét thật thì không dựng gì cả — không phải ẩn bằng CSS,
+     * mà là không có trong HTML. Xem `testimonials.show` trong src/data/profile.ts.
+     */
+    t.testimonials.show && (
+        <section class="section" id="testimonials">
+            <div class="shell">
+                <SectionHead title={t.testimonials.title} lead={t.testimonials.lead} />
+
+                <div class="quotes">
+                    {t.testimonials.items.map((item, i) => (
+                        <figure class="quote" data-reveal style={`--reveal-delay:${i * 110}ms`}>
+                            <svg
+                                class="quote__mark"
+                                viewBox="0 0 24 24"
+                                width="26"
+                                height="26"
+                                fill="currentColor"
+                                aria-hidden="true"
+                            >
+                                <path d="M9.6 5.4 8.1 8.2A5.6 5.6 0 0 0 5 13.3v.3h3.4V19H3v-5.1a9.6 9.6 0 0 1 3.4-7.4l1.4-1.1zm10 0-1.5 2.8a5.6 5.6 0 0 0-3.1 5.1v.3h3.4V19H13v-5.1a9.6 9.6 0 0 1 3.4-7.4l1.4-1.1z" />
+                            </svg>
+
+                            <blockquote class="quote__text">{item.quote}</blockquote>
+
+                            <figcaption class="quote__who">
+                                <span class="quote__avatar" aria-hidden="true">
+                                    {item.avatar ? (
+                                        <img
+                                            src={item.avatar}
+                                            alt=""
+                                            width="44"
+                                            height="44"
+                                            loading="lazy"
+                                            decoding="async"
+                                        />
+                                    ) : (
+                                        initial(item.name)
+                                    )}
+                                </span>
+                                <span class="quote__id">
+                                    <strong>{item.name}</strong>
+                                    <span class="quote__role mono">
+                                        {item.role} · {item.company}
+                                    </span>
+                                </span>
+                            </figcaption>
+                        </figure>
+                    ))}
+                </div>
+            </div>
+        </section>
+    )
+}
+
+<style>
+    .quotes {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+        gap: var(--gap);
+    }
+
+    /* Vạch nhấn bên trái + chữ nghiêng: quy ước quen thuộc của một đoạn trích dẫn. */
+    .quote {
+        position: relative;
+        margin: 0;
+        padding: clamp(1.4rem, 2.8vw, 2rem);
+        padding-left: clamp(1.6rem, 3vw, 2.25rem);
+        border: 1px solid var(--line);
+        border-left: 2px solid var(--accent);
+        border-radius: 4px 16px 16px 4px;
+        background: linear-gradient(105deg, rgba(110, 168, 255, 0.06), rgba(7, 10, 17, 0.75) 45%);
+        transition: border-color 0.45s var(--ease);
+    }
+
+    .quote:hover {
+        border-color: rgba(110, 168, 255, 0.3);
+        border-left-color: var(--accent-soft);
+    }
+
+    .quote__mark {
+        color: var(--accent);
+        opacity: 0.35;
+        margin-bottom: 0.7rem;
+    }
+
+    .quote__text {
+        margin: 0;
+        font-style: italic;
+        font-size: clamp(0.97rem, 0.93rem + 0.3vw, 1.1rem);
+        line-height: 1.65;
+        color: var(--text-dim);
+        text-wrap: pretty;
+    }
+
+    .quote__text::before {
+        content: '\201C';
+    }
+
+    .quote__text::after {
+        content: '\201D';
+    }
+
+    .quote__who {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        margin-top: 1.4rem;
+        padding-top: 1.1rem;
+        border-top: 1px solid var(--line);
+    }
+
+    .quote__avatar {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 1px solid var(--line-strong);
+        background: rgba(110, 168, 255, 0.1);
+        font-family: var(--font-display);
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--accent-soft);
+    }
+
+    .quote__avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .quote__id {
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+        min-width: 0;
+    }
+
+    .quote__id strong {
+        font-family: var(--font-display);
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: var(--text);
+    }
+
+    .quote__role {
+        font-size: 0.72rem;
+        color: var(--text-mut);
+    }
+</style>

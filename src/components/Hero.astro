@@ -9,8 +9,10 @@ const { lang } = Astro.props;
 const t = allContent[lang];
 ---
 
-<section class="hero" id="top">
+<section class="hero" id="top" data-hero>
     <canvas class="hero__canvas" data-hero-canvas aria-hidden="true"></canvas>
+    {/* Nền thay thế cho máy không chạy Three.js — chỉ hiện khi script bật `data-bg="css"`. */}
+    <div class="hero__aurora" aria-hidden="true"></div>
     <div class="hero__veil" aria-hidden="true"></div>
 
     <div class="shell hero__inner">
@@ -52,22 +54,45 @@ const t = allContent[lang];
 </section>
 
 <script>
+    const hero = document.querySelector<HTMLElement>('[data-hero]');
     const canvas = document.querySelector<HTMLCanvasElement>('[data-hero-canvas]');
-    if (canvas) {
-        // three.js nặng hơn cả phần còn lại của trang cộng lại, nên chỉ nạp sau khi
-        // trình duyệt đã rảnh — nội dung chữ không phải chờ nó.
-        const boot = () => {
-            import('@/scripts/hero3d')
-                .then(({ initHero }) => initHero(canvas))
-                .catch(() => canvas.remove());
+
+    if (hero && canvas) {
+        /** Chuyển hẳn sang nền CSS: bỏ canvas khỏi DOM, bật lớp gradient. */
+        const useCssBackground = () => {
+            canvas.remove();
+            hero.dataset.bg = 'css';
         };
 
-        const idle = (window as Window & {
-            requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-        }).requestIdleCallback;
+        /*
+         * Điện thoại không tải Three.js — không phải nạp muộn, mà là không nạp.
+         * Đây là gói nặng nhất của trang, trong khi máy yếu và mạng di động lại
+         * chính là chỗ nó tốn nhất; đổi lấy một lớp gradient CSS gần như miễn phí.
+         *
+         * Cả người bật "giảm chuyển động" cũng vào nhánh này: `hero3d` có chế độ
+         * vẽ một khung tĩnh, nhưng tải cả thư viện 3D để vẽ đúng một ảnh đứng yên
+         * thì không đáng.
+         */
+        const mobile = window.matchMedia('(max-width: 768px)').matches;
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        if (idle) idle(boot, { timeout: 1500 });
-        else setTimeout(boot, 200);
+        if (mobile || reduced) {
+            useCssBackground();
+        } else {
+            // Máy để bàn: vẫn nạp muộn, sau khi trình duyệt đã vẽ xong phần chữ.
+            const boot = () => {
+                import('@/scripts/hero3d')
+                    .then(({ initHero }) => initHero(canvas))
+                    .catch(useCssBackground);
+            };
+
+            const idle = (window as Window & {
+                requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+            }).requestIdleCallback;
+
+            if (idle) idle(boot, { timeout: 1500 });
+            else setTimeout(boot, 200);
+        }
     }
 </script>
 
@@ -109,6 +134,35 @@ const t = allContent[lang];
 
     .hero__canvas[data-ready='true'] {
         opacity: 1;
+    }
+
+    /*
+     * Nền thay thế Three.js: ba quầng màu trôi rất chậm. Chỉ dùng transform và
+     * opacity nên trình duyệt chạy nó trên GPU, không tính lại bố cục khung nào.
+     * Mặc định tắt — script bật lên khi quyết định không nạp Three.js.
+     */
+    .hero__aurora {
+        position: absolute;
+        inset: -20%;
+        z-index: -2;
+        display: none;
+        background:
+            radial-gradient(28% 34% at 22% 30%, rgba(110, 168, 255, 0.3), transparent 68%),
+            radial-gradient(26% 30% at 74% 22%, rgba(167, 139, 250, 0.24), transparent 70%),
+            radial-gradient(30% 26% at 55% 76%, rgba(94, 234, 212, 0.16), transparent 72%);
+        filter: blur(26px);
+        will-change: transform, opacity;
+        animation: aurora 26s var(--ease) infinite alternate;
+    }
+
+    .hero[data-bg='css'] .hero__aurora {
+        display: block;
+    }
+
+    @keyframes aurora {
+        0% { transform: translate3d(-3%, -2%, 0) scale(1); opacity: 0.75; }
+        50% { transform: translate3d(3%, 2%, 0) scale(1.12); opacity: 1; }
+        100% { transform: translate3d(-2%, 3%, 0) scale(1.04); opacity: 0.8; }
     }
 
     /* Làm tối phía trái để chữ luôn đủ tương phản trên hình 3D. */
@@ -294,6 +348,13 @@ const t = allContent[lang];
     }
 
     @media (prefers-reduced-motion: reduce) {
+        /* Giữ nguyên quầng màu, chỉ dừng hẳn chuyển động. */
+        .hero__aurora {
+            animation: none;
+            transform: none;
+            opacity: 0.85;
+        }
+
         .hero__status,
         .hero__eyebrow,
         .hero__name,

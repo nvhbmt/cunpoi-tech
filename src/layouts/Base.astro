@@ -1,5 +1,5 @@
 ---
-import { site, content as allContent, type Lang } from '@/data/profile';
+import { site, content as allContent, homePath, type Lang } from '@/data/profile';
 import Nav from '@/components/Nav.astro';
 import Footer from '@/components/Footer.astro';
 import '@/styles/global.css';
@@ -11,8 +11,18 @@ interface Props {
 const { lang } = Astro.props;
 const t = allContent[lang];
 
-const canonical = new URL(lang === 'vi' ? '/' : '/en', site.url).href;
+const canonical = new URL(homePath(lang), site.url).href;
 const ogImage = new URL('/og.png', site.url).href;
+
+// Trang tiếng Việt cần thêm subset `vietnamese` (đ, ơ, ư và toàn bộ dấu);
+// trang tiếng Anh nằm trọn trong `latin` nên nạp trước hai file là thừa.
+const preloadFonts = [
+    '/fonts/inter-latin.woff2',
+    '/fonts/space-grotesk-latin.woff2',
+    ...(lang === 'vi'
+        ? ['/fonts/inter-vietnamese.woff2', '/fonts/space-grotesk-vietnamese.woff2']
+        : []),
+];
 
 const person = {
     '@context': 'https://schema.org',
@@ -24,7 +34,7 @@ const person = {
     jobTitle: 'Fullstack Developer',
     description: t.meta.description,
     image: ogImage,
-    sameAs: [site.github, site.live],
+    sameAs: [site.github, site.linkedin, site.live],
     address: {
         '@type': 'PostalAddress',
         addressLocality: 'Ho Chi Minh City',
@@ -54,9 +64,9 @@ const person = {
         <meta name="theme-color" content={site.themeColor} />
         <meta name="color-scheme" content="dark" />
         <link rel="canonical" href={canonical} />
-        <link rel="alternate" hreflang="vi" href={new URL('/', site.url).href} />
-        <link rel="alternate" hreflang="en" href={new URL('/en', site.url).href} />
-        <link rel="alternate" hreflang="x-default" href={new URL('/', site.url).href} />
+        <link rel="alternate" hreflang="vi" href={new URL(homePath('vi'), site.url).href} />
+        <link rel="alternate" hreflang="en" href={new URL(homePath('en'), site.url).href} />
+        <link rel="alternate" hreflang="x-default" href={new URL(homePath('vi'), site.url).href} />
         <link rel="sitemap" href="/sitemap-index.xml" />
 
         <meta property="og:type" content="profile" />
@@ -76,12 +86,15 @@ const person = {
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/favicon.svg" />
 
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-        />
+        {/*
+          Font tự chứa trong public/fonts (xem src/styles/fonts.css).
+          Nạp trước đúng hai subset mà màn hình đầu tiên chắc chắn dùng tới —
+          chữ thân bài và chữ tiêu đề của chính ngôn ngữ đang mở. JetBrains Mono
+          chỉ dùng cho nhãn nhỏ nên để nó tải thường, `font-display: swap` lo nốt.
+        */}
+        {preloadFonts.map((href) => (
+            <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />
+        ))}
 
         <script type="application/ld+json" set:html={JSON.stringify(person)} />
     </head>

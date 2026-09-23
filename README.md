@@ -4,7 +4,7 @@ Trang cá nhân của **Nguyễn Việt Hoàng** — Fullstack Developer. Trang 
 Astro, hero 3D bằng Three.js, song ngữ Việt/Anh.
 
 - Tiếng Việt: `/`
-- English: `/en`
+- English: `/en/`
 
 ## Chạy
 
@@ -15,6 +15,7 @@ npm run build        # astro check && astro build → ./dist
 npm run preview      # xem thử bản đã build
 npm run check        # chỉ kiểm tra kiểu, không build
 npm run og           # sinh lại public/og.png (ảnh xem trước khi dán link)
+npm run fonts        # tải lại font về public/fonts/ + sinh src/styles/fonts.css
 ```
 
 Yêu cầu Node 20+ (đang phát triển trên Node 22).
@@ -28,8 +29,11 @@ src/
 ├── components/            ← mỗi mục một file .astro, CSS scoped ngay trong file
 ├── scripts/
 │   ├── hero3d.ts          ← cảnh Three.js: lưới toạ độ + cụm đa diện wireframe
+│   ├── contact-form.ts    ← kiểm tra và gửi biểu mẫu liên hệ
 │   └── ui.ts              ← hiện dần khi cuộn, thanh nav, nghiêng thẻ theo con trỏ
-├── styles/global.css      ← biến màu, kiểu chữ, nút, chip
+├── styles/
+│   ├── global.css         ← biến màu, kiểu chữ, nút, chip
+│   └── fonts.css          ← SINH TỰ ĐỘNG, đừng sửa tay (xem scripts/fetch-fonts.mjs)
 └── pages/
     ├── index.astro        ← lang="vi"
     ├── en/index.astro     ← lang="en"
@@ -44,12 +48,28 @@ chuyện một ngôn ngữ bị bỏ sót.
 
 - **Song ngữ bằng hai trang tĩnh**, không phải JS đổi ngôn ngữ. `/` và `/en` là hai file HTML
   riêng, khai báo `hreflang` chéo nhau, nên Google lập chỉ mục cả hai.
-- **Three.js nạp trễ** qua `import()` động trong `requestIdleCallback`. Chữ và CSS hiện xong
-  trước; gói three (~538 KB) mới tải sau, và nếu tải lỗi thì canvas tự gỡ, nền lưới CSS ở dưới
-  vẫn giữ bố cục.
+- **Three.js chỉ tải trên máy để bàn.** Màn hẹp hơn 768px, hoặc người dùng bật "giảm chuyển
+  động", thì gói three (~538 KB) **không tải chút nào** — canvas bị gỡ khỏi DOM và hero đổi sang
+  `.hero__aurora`, một lớp gradient CSS chỉ động bằng `transform`/`opacity`. Máy yếu và mạng di
+  động đúng là chỗ gói ấy đắt nhất, nên ở đó nó không đáng.
+- **Còn lại thì nạp trễ** qua `import()` động trong `requestIdleCallback`. Chữ và CSS hiện xong
+  trước; tải lỗi thì rơi về đúng nền CSS nói trên.
 - **Cảnh 3D dừng khi không ai nhìn**: `IntersectionObserver` trên canvas cộng với
   `visibilitychange` — cuộn qua hero hoặc chuyển tab là `requestAnimationFrame` ngừng hẳn.
-- **`prefers-reduced-motion`** vẽ đúng một khung hình tĩnh rồi thôi.
+- **`prefers-reduced-motion`** bỏ hẳn Three.js, giữ quầng gradient nhưng dừng chuyển động.
+- **Font tự chứa trong `public/fonts/`**, không còn `<link>` ra `fonts.googleapis.com`. Gọi ra
+  Google Fonts nghĩa là chặn lần vẽ đầu để mở thêm hai kết nối rồi mới biết cần tải file nào.
+  Mỗi bộ là font biến thiên, cắt còn ba subset latin / latin-ext / vietnamese; `unicode-range`
+  lo phần còn lại, nên trang `/en` không tải file vietnamese. Trang nạp trước (`preload`) đúng
+  hai subset mà màn hình đầu chắc chắn dùng, theo ngôn ngữ của chính trang đó.
+- **Biểu mẫu liên hệ gửi qua dịch vụ ngoài** (Web3Forms), vì trang tĩnh thì không có máy chủ nào
+  nhận `POST`. Chưa điền `ACCESS_KEY` trong `src/scripts/contact-form.ts` thì biểu mẫu vẫn kiểm
+  tra dữ liệu nhưng báo thẳng là chưa nối dịch vụ và mời gửi email — không im lặng nuốt lời nhắn.
+- **Mục "Nhận xét" tắt sẵn** (`testimonials.show = false` trong `profile.ts`). Khung đã dựng đủ;
+  bật lên khi có lời nhận xét thật, chứ không trưng lời khen tự bịa.
+- **Đường dẫn luôn có `/` cuối** (`homePath()` trong `profile.ts`). Astro dựng `dist/en/index.html`,
+  sitemap khai `/en/`, Cloudflare chuyển hướng `/en` → `/en/`; canonical mà ghi `/en` thì Google
+  thấy một trang dưới hai địa chỉ.
 - **Tiếng Việt cần `line-height` ≥ 1.18** ở tiêu đề. Dấu xếp hai tầng (ễ, ộ, ỹ) vượt ra ngoài
   hộp chữ, và riêng tên ở hero còn tô nền gradient qua `background-clip: text` nên phải nới thêm
   `padding-block`, nếu không dấu bị mất màu.
@@ -87,8 +107,9 @@ npx wrangler deploy --dry-run  # thử trước, không đẩy gì lên
 làm lại lần nữa cho `www.cunpoi.tech`. Tên miền đã nằm sẵn trong tài khoản Cloudflare
 (nameserver `houston` / `sarah.ns.cloudflare.com`) nên bản ghi DNS và chứng chỉ TLS tự tạo.
 
-`public/_headers` đặt cache một năm cho `/_astro/*` (tên file có vân tay nên an toàn), không cache
-HTML, cùng vài header bảo mật cơ bản — Workers static assets đọc file này giống hệt Pages.
+`public/_headers` đặt cache một năm cho `/_astro/*` (tên file có vân tay nên an toàn) và cho
+`/fonts/*`, không cache HTML, cùng vài header bảo mật cơ bản — Workers static assets đọc file này
+giống hệt Pages.
 
 ## Việc còn để ngỏ
 
@@ -96,3 +117,7 @@ HTML, cùng vài header bảo mật cơ bản — Workers static assets đọc f
   khác có thể ra chữ hơi khác. Nếu cần chuẩn tuyệt đối thì nhúng font vào SVG.
 - Số điện thoại **cố ý không đặt trên trang** để tránh bot quét; nó vẫn nằm trong file CV tải về
   tại `public/cv/`.
+- **Ảnh chụp màn hình dự án chưa có.** Thẻ đang hiện ô giữ chỗ đúng tỉ lệ; thả ảnh vào
+  `public/shots/` rồi mở khối `shot:` đã viết sẵn trong `profile.ts` (cả hai ngôn ngữ).
+- **LinkedIn, khoá Web3Forms và lời nhận xét** đều đang là chỗ trống có ghi `TODO`. Ba thứ này
+  tự ẩn khi chưa điền, nên trang không bao giờ hiện liên kết chết.

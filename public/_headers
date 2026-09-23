@@ -7,6 +7,12 @@
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
 
+# Tên file font cố định nên không thể "immutable" vĩnh viễn, nhưng nội dung chỉ
+# đổi khi chạy lại `npm run fonts` — một năm cache là an toàn.
+/fonts/*
+  Cache-Control: public, max-age=31536000
+  Access-Control-Allow-Origin: *
+
 /cv/*
   Cache-Control: public, max-age=86400
 

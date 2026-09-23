@@ -3,6 +3,9 @@
    Tông tối cố định: cả trang được thiết kế quanh khung cảnh 3D nền đen.
    ========================================================================== */
 
+/* Font tự chứa, phải đứng trước mọi khai báo còn lại. */
+@import './fonts.css';
+
 :root {
     /* Nền, đi từ đáy trang lên bề mặt thẻ */
     --ink-900: #05070c;

@@ -14,15 +14,39 @@ const t = allContent[lang];
     <div class="shell">
         <SectionHead n={t.skills.n} title={t.skills.title} lead={t.skills.lead} />
 
-        <div class="skills">
+        <div class="tiers">
             {
-                t.skills.groups.map((group, i) => (
-                    <section class="skillset" data-reveal style={`--reveal-delay:${i * 80}ms`}>
-                        <h3 class="skillset__title">
-                            <span class="skillset__n mono">{String(i + 1).padStart(2, '0')}</span>
-                            {group.title}
-                        </h3>
-                        <ul class="skillset__items">
+                t.skills.tiers.map((tier, i) => (
+                    <section
+                        class="tier"
+                        data-level={tier.level}
+                        data-reveal
+                        style={`--reveal-delay:${i * 90}ms`}
+                    >
+                        <header class="tier__head">
+                            <span class="tier__dot" aria-hidden="true" />
+                            <h3 class="tier__title">{tier.title}</h3>
+                            <p class="tier__count mono">{tier.items.length}</p>
+                        </header>
+
+                        <p class="tier__note">{tier.note}</p>
+
+                        <ul class="tier__items">
+                            {tier.items.map((item) => (
+                                <li>{item}</li>
+                            ))}
+                        </ul>
+                    </section>
+                ))
+            }
+        </div>
+
+        <div class="aside" data-reveal style="--reveal-delay:280ms">
+            {
+                t.skills.aside.map((group) => (
+                    <section class="aside__group">
+                        <h3 class="aside__title mono">{group.title}</h3>
+                        <ul class="aside__items">
                             {group.items.map((item) => (
                                 <li>{item}</li>
                             ))}
@@ -35,86 +59,178 @@ const t = allContent[lang];
 </section>
 
 <style>
-    .skills {
-        display: grid;
-        /* Cố định 3 cột: 6 nhóm chia hết, không để lại ô trống lộ nền kẻ. */
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 1px;
-        background: var(--line);
+    /*
+     * Ba bậc xếp dọc, mỗi bậc một dải ngang. Xếp dọc chứ không chia cột vì thứ tự
+     * chính là thông tin: đọc từ trên xuống là đi từ "gõ mỗi ngày" tới "mới thử".
+     */
+    .tiers {
+        display: flex;
+        flex-direction: column;
+        gap: var(--gap);
+    }
+
+    /*
+     * Mỗi bậc tự khai ba biến màu, phần thân bên dưới chỉ việc dùng lại —
+     * đổi tông của một bậc chỉ phải sửa đúng một chỗ.
+     */
+    .tier {
+        --tier-fg: var(--accent-soft);
+        --tier-bd: rgba(110, 168, 255, 0.3);
+        --tier-bg: rgba(110, 168, 255, 0.08);
+        position: relative;
+        padding: clamp(1.25rem, 2.6vw, 1.9rem);
         border: 1px solid var(--line);
         border-radius: 16px;
-        overflow: hidden;
-    }
-
-    .skillset {
         background: var(--ink-850);
-        padding: clamp(1.25rem, 2.4vw, 1.75rem);
-        transition: background-color 0.45s var(--ease);
     }
 
-    .skillset:hover {
-        background: var(--ink-700);
-    }
-
-    .skillset__title {
-        display: flex;
-        align-items: baseline;
-        gap: 0.6rem;
-        font-size: 1rem;
-        letter-spacing: -0.02em;
-        margin-bottom: 1rem;
-    }
-
-    .skillset__n {
-        font-size: 0.68rem;
-        color: var(--accent);
+    /* Vạch màu bên trái: nhìn lướt là phân biệt được ba bậc. */
+    .tier::before {
+        content: '';
+        position: absolute;
+        inset: clamp(1.25rem, 2.6vw, 1.9rem) auto;
+        left: -1px;
+        width: 2px;
+        border-radius: 2px;
+        background: var(--tier-fg);
         opacity: 0.8;
     }
 
-    .skillset__items {
+    /* Bậc 1 — dùng hằng ngày: đậm nhất, có nền và viền rõ. */
+    .tier[data-level='daily'] {
+        background:
+            linear-gradient(150deg, rgba(110, 168, 255, 0.07), rgba(7, 10, 17, 0.9) 58%);
+        border-color: rgba(110, 168, 255, 0.24);
+    }
+
+    /* Bậc 2 — dự án thật: xám trung tính, không tranh chỗ với bậc 1. */
+    .tier[data-level='shipped'] {
+        --tier-fg: var(--text-dim);
+        --tier-bd: var(--line-strong);
+        --tier-bg: rgba(146, 172, 220, 0.06);
+    }
+
+    /* Bậc 3 — mới thử: chỉ còn viền, nền trong suốt. */
+    .tier[data-level='learning'] {
+        --tier-fg: var(--text-mut);
+        --tier-bd: var(--line);
+        --tier-bg: transparent;
+        background: transparent;
+    }
+
+    .tier__head {
         display: flex;
-        flex-direction: column;
-        gap: 0.42rem;
-        font-size: 0.85rem;
+        align-items: center;
+        gap: 0.65rem;
+    }
+
+    .tier__dot {
+        width: 8px;
+        height: 8px;
+        rotate: 45deg;
+        flex-shrink: 0;
+        background: var(--tier-fg);
+    }
+
+    /* Bậc cuối để rỗng ruột — cùng một hình, khác độ "đặc". */
+    .tier[data-level='learning'] .tier__dot {
+        background: transparent;
+        border: 1px solid var(--tier-fg);
+    }
+
+    .tier__title {
+        font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.3rem);
+        letter-spacing: -0.02em;
+    }
+
+    .tier__count {
+        margin-left: auto;
+        font-size: 0.7rem;
         color: var(--text-mut);
     }
 
-    .skillset__items li {
+    .tier__note {
+        margin-top: 0.45rem;
+        margin-bottom: 1.1rem;
+        font-size: 0.85rem;
+        line-height: 1.55;
+        color: var(--text-mut);
+        max-width: 62ch;
+    }
+
+    .tier__items {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+    }
+
+    .tier__items li {
+        font-family: var(--font-mono);
+        font-size: 0.74rem;
+        letter-spacing: 0.01em;
+        color: var(--tier-fg);
+        border: 1px solid var(--tier-bd);
+        background: var(--tier-bg);
+        border-radius: 999px;
+        padding: 0.3rem 0.7rem;
+        white-space: nowrap;
+        transition: border-color 0.3s var(--ease), color 0.3s var(--ease);
+    }
+
+    .tier[data-level='daily'] .tier__items li {
+        color: var(--text);
+    }
+
+    .tier__items li:hover {
+        border-color: rgba(110, 168, 255, 0.5);
+        color: #fff;
+    }
+
+    /* --- quy trình & ngôn ngữ --- */
+
+    /*
+     * Hai nhóm này không đo được bằng thước "dùng nhiều hay ít", nên tách khỏi
+     * ba bậc trên và để chữ nhỏ hơn hẳn.
+     */
+    .aside {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+        gap: 1.25rem var(--gap);
+        margin-top: var(--gap);
+        padding-top: var(--gap);
+        border-top: 1px solid var(--line);
+    }
+
+    .aside__title {
+        font-size: 0.68rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--text-mut);
+        margin-bottom: 0.7rem;
+    }
+
+    .aside__items {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem 1.1rem;
+        font-size: 0.82rem;
+        color: var(--text-dim);
+    }
+
+    .aside__items li {
         position: relative;
-        padding-left: 0.95rem;
-        transition: color 0.3s var(--ease);
+        padding-left: 0.85rem;
     }
 
-    @media (max-width: 940px) {
-        .skills {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-    }
-
-    @media (max-width: 580px) {
-        .skills {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    .skillset__items li::before {
+    .aside__items li::before {
         content: '';
         position: absolute;
         left: 0;
-        top: 0.6em;
+        top: 0.62em;
         width: 4px;
         height: 4px;
         rotate: 45deg;
         background: var(--accent);
         opacity: 0.45;
-        transition: opacity 0.3s var(--ease), background-color 0.3s var(--ease);
-    }
-
-    .skillset:hover .skillset__items li {
-        color: var(--text-dim);
-    }
-
-    .skillset:hover .skillset__items li::before {
-        opacity: 0.85;
     }
 </style>
