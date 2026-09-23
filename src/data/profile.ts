@@ -386,22 +386,13 @@ const vi: Content = {
                     { value: 'Tự động', label: 'chấm xong ngay khi học sinh nộp bài' },
                     { value: '06/2026', label: 'chạy thật liên tục từ' },
                 ],
-                /*
-                 * TODO — ảnh chụp màn hình: đặt file vào `public/shots/iexam.png`
-                 * (kèm `iexam.webp` nếu xuất được) rồi mở khối dưới đây:
-                 *
-                 *   shot: {
-                 *       src: '/shots/iexam.png',
-                 *       webp: '/shots/iexam.webp',
-                 *       width: 1600,
-                 *       height: 1000,
-                 *       alt: '…mô tả đúng thứ đang có trên ảnh…',
-                 *   },
-                 *
-                 * `width`/`height` phải là kích thước thật của file: thẻ dùng nó để
-                 * chừa sẵn chỗ, thiếu là ảnh tải xong sẽ đẩy nội dung nhảy xuống.
-                 * Chưa mở thì thẻ hiện ô giữ chỗ, bố cục vẫn y như khi đã có ảnh.
-                 */
+                shot: {
+                    src: '/shots/iexam.jpg',
+                    webp: '/shots/iexam.webp',
+                    width: 1600,
+                    height: 844,
+                    alt: 'Màn hình tổng quan của giáo viên trên iExam: số đề thi, số học sinh, số em đang làm bài và biểu đồ tình hình 7 ngày',
+                },
                 links: [{ label: 'iexam.vn', href: 'https://iexam.vn', kind: 'live' }],
                 privateRepo: true,
                 badge: 'Đang chạy thật',
@@ -428,22 +419,13 @@ const vi: Content = {
                     { value: 'Hàng tuần', label: 'contest có bảng xếp hạng' },
                     { value: 'Discord', label: 'đăng nhập, không phải tạo tài khoản mới' },
                 ],
-                /*
-                 * TODO — ảnh chụp màn hình: đặt file vào `public/shots/bcn-judge.png`
-                 * (kèm `bcn-judge.webp` nếu xuất được) rồi mở khối dưới đây:
-                 *
-                 *   shot: {
-                 *       src: '/shots/bcn-judge.png',
-                 *       webp: '/shots/bcn-judge.webp',
-                 *       width: 1600,
-                 *       height: 1000,
-                 *       alt: '…mô tả đúng thứ đang có trên ảnh…',
-                 *   },
-                 *
-                 * `width`/`height` phải là kích thước thật của file: thẻ dùng nó để
-                 * chừa sẵn chỗ, thiếu là ảnh tải xong sẽ đẩy nội dung nhảy xuống.
-                 * Chưa mở thì thẻ hiện ô giữ chỗ, bố cục vẫn y như khi đã có ảnh.
-                 */
+                shot: {
+                    src: '/shots/bcn-judge.jpg',
+                    webp: '/shots/bcn-judge.webp',
+                    width: 1600,
+                    height: 1000,
+                    alt: 'Trang contest của BCN Judge: đồng hồ đếm ngược, danh sách bài kèm điểm từng bài và bảng xếp hạng trực tiếp bên phải',
+                },
                 links: [{ label: 'GitHub', href: 'https://github.com/nvhbmt/bcn-judge', kind: 'code' }],
                 badge: 'Đang chạy thật',
                 tone: 'live',
@@ -468,22 +450,13 @@ const vi: Content = {
                     { value: 'Quét QR', label: 'tra cứu học sinh tại chỗ' },
                     { value: '1 app', label: 'Cờ đỏ, trực ban, sổ đầu bài, Đoàn' },
                 ],
-                /*
-                 * TODO — ảnh chụp màn hình: đặt file vào `public/shots/tonglenh.png`
-                 * (kèm `tonglenh.webp` nếu xuất được) rồi mở khối dưới đây:
-                 *
-                 *   shot: {
-                 *       src: '/shots/tonglenh.png',
-                 *       webp: '/shots/tonglenh.webp',
-                 *       width: 1600,
-                 *       height: 1000,
-                 *       alt: '…mô tả đúng thứ đang có trên ảnh…',
-                 *   },
-                 *
-                 * `width`/`height` phải là kích thước thật của file: thẻ dùng nó để
-                 * chừa sẵn chỗ, thiếu là ảnh tải xong sẽ đẩy nội dung nhảy xuống.
-                 * Chưa mở thì thẻ hiện ô giữ chỗ, bố cục vẫn y như khi đã có ảnh.
-                 */
+                shot: {
+                    src: '/shots/tonglenh.jpg',
+                    webp: '/shots/tonglenh.webp',
+                    width: 1440,
+                    height: 900,
+                    alt: 'Bảng xếp hạng thi đua của hệ thống THPT Tông Lệnh: điểm thi đua và điểm sổ đầu bài của từng lớp',
+                },
                 links: [],
                 privateRepo: true,
                 badge: 'Đang chạy thật',
@@ -494,12 +467,12 @@ const vi: Content = {
     skills: {
         n: '04',
         title: 'Kỹ năng',
-        lead: 'Chia theo mức tôi thật sự dùng, không phải theo danh sách nghe cho oai.',
+        lead: 'Xếp theo mức độ tôi dùng, từ thường xuyên nhất xuống.',
         tiers: [
             {
                 level: 'daily',
                 title: 'Dùng hằng ngày',
-                note: 'Mở máy lên là gõ. Nhận việc gấp bằng những thứ này thì tôi không phải tra cứu.',
+                note: 'Gõ gần như mỗi ngày, ở cả việc công ty lẫn dự án riêng.',
                 items: [
                     'React 19',
                     'TypeScript',
@@ -521,7 +494,7 @@ const vi: Content = {
             {
                 level: 'shipped',
                 title: 'Đã dùng trong dự án thật',
-                note: 'Đủ để đưa lên chạy thật và tự sửa khi hỏng, nhưng không phải tuần nào cũng đụng.',
+                note: 'Đã dùng để làm xong việc thật, nhưng lâu lâu mới đụng lại.',
                 items: [
                     'gRPC · Protobuf',
                     'Kiến trúc microservice',
@@ -547,7 +520,7 @@ const vi: Content = {
             {
                 level: 'learning',
                 title: 'Đã thử · đang học',
-                note: 'Làm được việc nhỏ hoặc mới dựng thử. Nhận việc chính bằng mấy thứ này thì tôi nói trước.',
+                note: 'Mới dùng ở mức cơ bản, chưa dám nói là thạo.',
                 items: [
                     'Milkdown · Lexical',
                     'ApexCharts',
@@ -811,22 +784,13 @@ const en: Content = {
                     { value: 'Instant', label: 'marking the moment a student submits' },
                     { value: '06/2026', label: 'running in production since' },
                 ],
-                /*
-                 * TODO — ảnh chụp màn hình: đặt file vào `public/shots/iexam.png`
-                 * (kèm `iexam.webp` nếu xuất được) rồi mở khối dưới đây:
-                 *
-                 *   shot: {
-                 *       src: '/shots/iexam.png',
-                 *       webp: '/shots/iexam.webp',
-                 *       width: 1600,
-                 *       height: 1000,
-                 *       alt: '…mô tả đúng thứ đang có trên ảnh…',
-                 *   },
-                 *
-                 * `width`/`height` phải là kích thước thật của file: thẻ dùng nó để
-                 * chừa sẵn chỗ, thiếu là ảnh tải xong sẽ đẩy nội dung nhảy xuống.
-                 * Chưa mở thì thẻ hiện ô giữ chỗ, bố cục vẫn y như khi đã có ảnh.
-                 */
+                shot: {
+                    src: '/shots/iexam.jpg',
+                    webp: '/shots/iexam.webp',
+                    width: 1600,
+                    height: 844,
+                    alt: 'The iExam teacher dashboard: exam and student counts, live attempts, and a seven-day activity chart',
+                },
                 links: [{ label: 'iexam.vn', href: 'https://iexam.vn', kind: 'live' }],
                 privateRepo: true,
                 badge: 'Live in production',
@@ -853,22 +817,13 @@ const en: Content = {
                     { value: 'Weekly', label: 'contests with a live scoreboard' },
                     { value: 'Discord', label: 'login, no new account needed' },
                 ],
-                /*
-                 * TODO — ảnh chụp màn hình: đặt file vào `public/shots/bcn-judge.png`
-                 * (kèm `bcn-judge.webp` nếu xuất được) rồi mở khối dưới đây:
-                 *
-                 *   shot: {
-                 *       src: '/shots/bcn-judge.png',
-                 *       webp: '/shots/bcn-judge.webp',
-                 *       width: 1600,
-                 *       height: 1000,
-                 *       alt: '…mô tả đúng thứ đang có trên ảnh…',
-                 *   },
-                 *
-                 * `width`/`height` phải là kích thước thật của file: thẻ dùng nó để
-                 * chừa sẵn chỗ, thiếu là ảnh tải xong sẽ đẩy nội dung nhảy xuống.
-                 * Chưa mở thì thẻ hiện ô giữ chỗ, bố cục vẫn y như khi đã có ảnh.
-                 */
+                shot: {
+                    src: '/shots/bcn-judge.jpg',
+                    webp: '/shots/bcn-judge.webp',
+                    width: 1600,
+                    height: 1000,
+                    alt: 'A BCN Judge contest page: countdown timer, per-problem scores and the live scoreboard on the right',
+                },
                 links: [{ label: 'GitHub', href: 'https://github.com/nvhbmt/bcn-judge', kind: 'code' }],
                 badge: 'Live in production',
                 tone: 'live',
@@ -893,22 +848,13 @@ const en: Content = {
                     { value: 'QR scan', label: 'pull up any student on the spot' },
                     { value: '1 app', label: 'monitors, day book and union duties' },
                 ],
-                /*
-                 * TODO — ảnh chụp màn hình: đặt file vào `public/shots/tonglenh.png`
-                 * (kèm `tonglenh.webp` nếu xuất được) rồi mở khối dưới đây:
-                 *
-                 *   shot: {
-                 *       src: '/shots/tonglenh.png',
-                 *       webp: '/shots/tonglenh.webp',
-                 *       width: 1600,
-                 *       height: 1000,
-                 *       alt: '…mô tả đúng thứ đang có trên ảnh…',
-                 *   },
-                 *
-                 * `width`/`height` phải là kích thước thật của file: thẻ dùng nó để
-                 * chừa sẵn chỗ, thiếu là ảnh tải xong sẽ đẩy nội dung nhảy xuống.
-                 * Chưa mở thì thẻ hiện ô giữ chỗ, bố cục vẫn y như khi đã có ảnh.
-                 */
+                shot: {
+                    src: '/shots/tonglenh.jpg',
+                    webp: '/shots/tonglenh.webp',
+                    width: 1440,
+                    height: 900,
+                    alt: 'The Tong Lenh conduct leaderboard: per-class merit scores and logbook scores',
+                },
                 links: [],
                 privateRepo: true,
                 badge: 'Live in production',
@@ -919,12 +865,12 @@ const en: Content = {
     skills: {
         n: '04',
         title: 'Skills',
-        lead: 'Sorted by how much I actually use them, not by how good the list looks.',
+        lead: 'Grouped by how often I actually use them, most frequent first.',
         tiers: [
             {
                 level: 'daily',
                 title: 'Daily drivers',
-                note: 'What I open the editor to. Hand me urgent work in these and I will not be reading docs.',
+                note: 'Almost every day, at work and on my own projects.',
                 items: [
                     'React 19',
                     'TypeScript',
@@ -946,7 +892,7 @@ const en: Content = {
             {
                 level: 'shipped',
                 title: 'Shipped in real projects',
-                note: 'Enough to put it in production and fix it when it breaks — just not every week.',
+                note: 'Used to finish real work, though I come back to it less often.',
                 items: [
                     'gRPC · Protobuf',
                     'Microservice architecture',
@@ -972,7 +918,7 @@ const en: Content = {
             {
                 level: 'learning',
                 title: 'Tried · learning',
-                note: 'Small jobs or prototypes so far. If a project leans on these, I will say so upfront.',
+                note: 'Basic use so far — not something I would claim to know well.',
                 items: [
                     'Milkdown · Lexical',
                     'ApexCharts',

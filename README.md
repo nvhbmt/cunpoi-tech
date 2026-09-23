@@ -67,6 +67,13 @@ chuyện một ngôn ngữ bị bỏ sót.
   tra dữ liệu nhưng báo thẳng là chưa nối dịch vụ và mời gửi email — không im lặng nuốt lời nhắn.
 - **Mục "Nhận xét" tắt sẵn** (`testimonials.show = false` trong `profile.ts`). Khung đã dựng đủ;
   bật lên khi có lời nhận xét thật, chứ không trưng lời khen tự bịa.
+- **Ảnh dự án lấy từ chính sản phẩm**, để trong `public/shots/` kèm bản `.webp`. iExam dùng lại
+  ảnh marketing của `imath-test/public/landing/`, đã xoá hộp liên hệ ở thanh bên vì số điện thoại
+  trong đó là của người khác. BCN Judge chụp bằng Playwright của chính dự án trên bản chạy máy
+  với `db:seed:demo`. Tông Lệnh lấy từ bộ ảnh hướng dẫn `docs/huong-dan/images/`. Cả ba đều là dữ
+  liệu demo, không có thông tin học sinh thật.
+- **Khung ảnh lấy tỉ lệ của từng file** qua biến `--shot-ratio` (ProjectCard đặt từ
+  `shot.width`/`shot.height`), nên ảnh hiện trọn, không bị `object-fit: cover` cắt mất thanh bên.
 - **Đường dẫn luôn có `/` cuối** (`homePath()` trong `profile.ts`). Astro dựng `dist/en/index.html`,
   sitemap khai `/en/`, Cloudflare chuyển hướng `/en` → `/en/`; canonical mà ghi `/en` thì Google
   thấy một trang dưới hai địa chỉ.
@@ -117,7 +124,5 @@ giống hệt Pages.
   khác có thể ra chữ hơi khác. Nếu cần chuẩn tuyệt đối thì nhúng font vào SVG.
 - Số điện thoại **cố ý không đặt trên trang** để tránh bot quét; nó vẫn nằm trong file CV tải về
   tại `public/cv/`.
-- **Ảnh chụp màn hình dự án chưa có.** Thẻ đang hiện ô giữ chỗ đúng tỉ lệ; thả ảnh vào
-  `public/shots/` rồi mở khối `shot:` đã viết sẵn trong `profile.ts` (cả hai ngôn ngữ).
 - **LinkedIn, khoá Web3Forms và lời nhận xét** đều đang là chỗ trống có ghi `TODO`. Ba thứ này
   tự ẩn khi chưa điền, nên trang không bao giờ hiện liên kết chết.

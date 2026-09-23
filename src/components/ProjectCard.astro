@@ -35,7 +35,10 @@ const shot = project.shot;
 
     {
         withShot && (
-            <div class="card__shot">
+            <div
+                class="card__shot"
+                style={shot ? `--shot-ratio:${shot.width} / ${shot.height}` : undefined}
+            >
                 {shot ? (
                     <picture>
                         {/* .webp nhẹ hơn nhiều; trình duyệt cũ tự bỏ qua <source> và lấy <img>. */}
@@ -193,12 +196,14 @@ const shot = project.shot;
     /* --- ảnh chụp màn hình --- */
 
     /*
-     * Tỉ lệ cố định cho cả ảnh thật lẫn ô giữ chỗ. Nhờ vậy thẻ cao đúng bằng nhau
-     * dù dự án này đã có ảnh còn dự án kia thì chưa.
+     * Khung ảnh lấy đúng tỉ lệ của file (script đặt --shot-ratio từ width/height),
+     * nên ảnh hiện trọn vẹn, không bị `cover` cắt mất thanh bên hay cột phải.
+     * Chưa có ảnh thì rơi về 16/10 — đúng tỉ lệ hai ảnh đang dùng, nên thẻ có ảnh
+     * và thẻ giữ chỗ vẫn cao bằng nhau khi đứng cạnh nhau.
      */
     .card__shot {
         position: relative;
-        aspect-ratio: 16 / 10;
+        aspect-ratio: var(--shot-ratio, 16 / 10);
         border: 1px solid var(--line);
         border-radius: 12px;
         overflow: hidden;
@@ -213,12 +218,12 @@ const shot = project.shot;
     }
 
     /*
-     * Ảnh chụp màn hình gần như luôn quan trọng nhất ở mép trên (thanh điều hướng,
-     * tiêu đề), nên khi phải cắt thì cắt từ dưới lên.
+     * `contain` chứ không phải `cover`: khung đã đúng tỉ lệ file nên hai cách cho
+     * kết quả như nhau, nhưng nếu sau này thả nhầm ảnh lệch tỉ lệ thì `contain`
+     * chỉ để hở viền, còn `cover` thì âm thầm cắt mất một phần giao diện.
      */
     .card__shot img {
-        object-fit: cover;
-        object-position: top center;
+        object-fit: contain;
     }
 
     .card__shot-soon {
@@ -243,11 +248,6 @@ const shot = project.shot;
 
     .card__shot-soon svg {
         opacity: 0.55;
-    }
-
-    /* Thẻ trải hết hàng thì ảnh 16/10 cao quá — hạ trần chiều cao lại. */
-    .card--featured .card__shot {
-        max-height: 22rem;
     }
 
     /* --- đầu thẻ --- */
